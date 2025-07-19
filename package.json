@@ -1,0 +1,26 @@
+{
+  "name": "@token-ring/runnable",
+  "version": "0.1.0",
+  "description": "Core Runnable interface and base types for creating executable, streamable operations.",
+  "main": "index.js",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": "./index.js",
+    "./*": "./*.js"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "eslint": "eslint --fix ./",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "eventemitter3": "^5.0.1",
+    "zod": "^3.25.71"
+  },
+  "devDependencies": {
+    "@token-ring/eslint-config": "0.0.0",
+    "vitest": "^1.3.1"
+  }
+}
