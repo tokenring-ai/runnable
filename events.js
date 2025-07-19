@@ -58,81 +58,80 @@
 
 // Base class providing timestamp handling and metadata spread
 class BaseEvent {
-  /**
-   * @param {string} type
-   * @param {Partial<BaseRunnableEvent>} [metadata]
-   */
-  constructor(type, metadata = {}) {
-    /** @type {string} */
-    this.type = type;
-    /** @type {number} */
-    this.timestamp = Date.now();
-    Object.assign(this, metadata);
-  }
+	/**
+	 * @param {string} type
+	 * @param {Partial<BaseRunnableEvent>} [metadata]
+	 */
+	constructor(type, metadata = {}) {
+		/** @type {string} */
+		this.type = type;
+		/** @type {number} */
+		this.timestamp = Date.now();
+		Object.assign(this, metadata);
+	}
 }
 
 /**
  * LogEvent class representing a log message.
  */
 export class LogEvent extends BaseEvent {
-  /**
-   * @param {'debug'|'info'|'warn'|'error'} level
-   * @param {string} message
-   * @param {Partial<BaseRunnableEvent> & {details?: any}} [metadata]
-   */
-  constructor(level, message, metadata = {}) {
-    super('log', metadata);
-    this.level = level;
-    this.message = message;
-  }
+	/**
+	 * @param {'debug'|'info'|'warn'|'error'} level
+	 * @param {string} message
+	 * @param {Partial<BaseRunnableEvent> & {details?: any}} [metadata]
+	 */
+	constructor(level, message, metadata = {}) {
+		super("log", metadata);
+		this.level = level;
+		this.message = message;
+	}
 }
 
 /**
  * ChunkEvent for streaming partial output.
  */
 export class ChunkEvent extends BaseEvent {
-  /**
-   * @param {any} data
-   * @param {Partial<BaseRunnableEvent>} [metadata]
-   */
-  constructor(data, metadata = {}) {
-    super('chunk', metadata);
-    this.data = data;
-  }
+	/**
+	 * @param {any} data
+	 * @param {Partial<BaseRunnableEvent>} [metadata]
+	 */
+	constructor(data, metadata = {}) {
+		super("chunk", metadata);
+		this.data = data;
+	}
 }
 
 /**
  * ErrorEvent represents a handled error yielded from a Runnable.
  */
 export class ErrorEvent extends BaseEvent {
-  /**
-   * @param {Error|string|{name:string,message:string,stack?:string,details?:any}} err
-   * @param {Partial<BaseRunnableEvent>} [metadata]
-   */
-  constructor(err, metadata = {}) {
-    super('error_event', metadata);
-    let errorObj;
-    if (err instanceof Error) {
-      errorObj = { name: err.name, message: err.message, stack: err.stack };
-    } else if (typeof err === 'string') {
-      errorObj = { name: 'Error', message: err };
-    } else {
-      errorObj = err;
-    }
-    this.error = errorObj;
-  }
+	/**
+	 * @param {Error|string|{name:string,message:string,stack?:string,details?:any}} err
+	 * @param {Partial<BaseRunnableEvent>} [metadata]
+	 */
+	constructor(err, metadata = {}) {
+		super("error_event", metadata);
+		let errorObj;
+		if (err instanceof Error) {
+			errorObj = { name: err.name, message: err.message, stack: err.stack };
+		} else if (typeof err === "string") {
+			errorObj = { name: "Error", message: err };
+		} else {
+			errorObj = err;
+		}
+		this.error = errorObj;
+	}
 }
 
 // Factory helpers kept for backward compatibility
 export function createLogEvent(level, message, metadata = {}) {
-  return new LogEvent(level, message, metadata);
+	return new LogEvent(level, message, metadata);
 }
 
 export function createChunkEvent(data, metadata = {}) {
-  return new ChunkEvent(data, metadata);
+	return new ChunkEvent(data, metadata);
 }
 
 export function createErrorEvent(err, metadata = {}) {
-  return new ErrorEvent(err, metadata);
+	return new ErrorEvent(err, metadata);
 }
-
