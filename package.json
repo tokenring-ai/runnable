@@ -4,7 +4,7 @@
 	"description": "Core Runnable interface and base types for creating executable, streamable operations.",
 	"main": "index.js",
 	"type": "module",
-	"private": true,
+	"license": "MIT",
 	"exports": {
 		".": "./index.js",
 		"./*": "./*.js"
