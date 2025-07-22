@@ -25,7 +25,7 @@ export class GraphOrchestrator extends Runnable {
 	 * @param {{graph: RunnableGraph, persistence: any, input: any, output: any, context: any}} params
 	 * @returns {Promise<boolean>|boolean}
 	 */
-	// eslint-disable-next-line no-unused-vars
+
 	async updateGraph({ graph, persistence, input, output, context }) {
 		return false;
 	}
