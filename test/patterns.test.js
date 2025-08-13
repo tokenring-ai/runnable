@@ -4,8 +4,8 @@ import {
 	FilterRunnable,
 	ConditionalRunnable,
 	ParallelJoinRunnable,
-} from "../patterns.js";
-import { Runnable } from "../runnable.js";
+} from "../patterns.ts";
+import { Runnable } from "../runnable.ts";
 
 async function collect(generator) {
 	const events = [];

@@ -1,20 +1,22 @@
-import { Runnable } from "./runnable.js";
+import { Runnable, RunnableOptions } from "./runnable.js";
 import { ChunkEvent } from "./events.js";
 
 /**
  * Runnable that applies a mapping function to each item of an input array.
  */
-export class MapRunnable extends Runnable {
+export class MapRunnable extends Runnable<any, any, any, any> {
 	/**
-	 * @param {(item: any, context: any) => any | Promise<any>} mapFn
-	 * @param {RunnableOptions} [options]
+	 * @param mapFn Function that maps each input item
+	 * @param options Optional runnable options
 	 */
-	constructor(mapFn, options) {
+	constructor(
+		public mapFn: (item: any, context: any) => any | Promise<any>,
+		options?: RunnableOptions
+	) {
 		super(options);
-		this.mapFn = mapFn;
 	}
 
-	async *invoke(input, context) {
+	async *invoke(input: any, context: any): AsyncGenerator<ChunkEvent, any[], unknown> {
 		if (!Array.isArray(input)) {
 			throw new Error("MapRunnable expects input to be an array");
 		}
@@ -31,17 +33,19 @@ export class MapRunnable extends Runnable {
 /**
  * Runnable that filters an input array using a predicate function.
  */
-export class FilterRunnable extends Runnable {
+export class FilterRunnable extends Runnable<any, any, any, any> {
 	/**
-	 * @param {(item: any, context: any) => boolean | Promise<boolean>} filterFn
-	 * @param {RunnableOptions} [options]
+	 * @param filterFn Function that determines which items to keep
+	 * @param options Optional runnable options
 	 */
-	constructor(filterFn, options) {
+	constructor(
+		public filterFn: (item: any, context: any) => boolean | Promise<boolean>,
+		options?: RunnableOptions
+	) {
 		super(options);
-		this.filterFn = filterFn;
 	}
 
-	async *invoke(input, context) {
+	async *invoke(input: any, context: any): AsyncGenerator<ChunkEvent, any[], unknown> {
 		if (!Array.isArray(input)) {
 			throw new Error("FilterRunnable expects input to be an array");
 		}
@@ -59,21 +63,23 @@ export class FilterRunnable extends Runnable {
 /**
  * Runnable that chooses between two runnables based on a predicate.
  */
-export class ConditionalRunnable extends Runnable {
+export class ConditionalRunnable extends Runnable<any, any, any, any> {
 	/**
-	 * @param {(input: any, context: any) => boolean | Promise<boolean>} predicate
-	 * @param {Runnable} trueRunnable
-	 * @param {Runnable} [falseRunnable]
-	 * @param {RunnableOptions} [options]
+	 * @param predicate Function that determines which branch to take
+	 * @param trueRunnable Runnable to use when predicate returns true
+	 * @param falseRunnable Optional runnable to use when predicate returns false
+	 * @param options Optional runnable options
 	 */
-	constructor(predicate, trueRunnable, falseRunnable, options) {
+	constructor(
+		public predicate: (input: any, context: any) => boolean | Promise<boolean>,
+		public trueRunnable: Runnable<any, any, any, any>,
+		public falseRunnable?: Runnable<any, any, any, any>,
+		options?: RunnableOptions
+	) {
 		super(options);
-		this.predicate = predicate;
-		this.trueRunnable = trueRunnable;
-		this.falseRunnable = falseRunnable;
 	}
 
-	async *invoke(input, context) {
+	async *invoke(input: any, context: any): AsyncGenerator<any, any, unknown> {
 		const condition = await this.predicate(input, context);
 		const runnable = condition ? this.trueRunnable : this.falseRunnable;
 		if (!runnable) {
@@ -92,19 +98,21 @@ export class ConditionalRunnable extends Runnable {
 /**
  * Runnable that executes multiple runnables in parallel and combines their outputs.
  */
-export class ParallelJoinRunnable extends Runnable {
+export class ParallelJoinRunnable extends Runnable<any, any, any, any> {
 	/**
-	 * @param {Runnable[]} runnables
-	 * @param {(outputs: any[]) => any} [combineFn]
-	 * @param {RunnableOptions} [options]
+	 * @param runnables Array of runnables to execute in parallel
+	 * @param combineFn Optional function to combine the outputs
+	 * @param options Optional runnable options
 	 */
-	constructor(runnables, combineFn, options) {
+	constructor(
+		public runnables: Runnable<any, any, any, any>[],
+		public combineFn?: (outputs: any[]) => any,
+		options?: RunnableOptions
+	) {
 		super(options);
-		this.runnables = runnables;
-		this.combineFn = combineFn;
 	}
 
-	async *invoke(input, context) {
+	async *invoke(input: any, context: any): AsyncGenerator<any, any, unknown> {
 		const promises = this.runnables.map(async (r) => {
 			const events = [];
 			const iterator = r.invoke(input, context)[Symbol.asyncIterator]();

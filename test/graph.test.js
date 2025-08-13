@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { z } from "zod";
-import { RunnableGraph } from "../graph.js";
-import { Runnable } from "../runnable.js";
-import { RunnableGraphBuilder } from "../graphBuilder.js";
+import { RunnableGraph } from "../graph.ts";
+import { Runnable } from "../runnable.ts";
+import { RunnableGraphBuilder } from "../graphBuilder.ts";
 
 // Helper to consume a generator and collect events for testing
 async function consumeGenerator(generator) {

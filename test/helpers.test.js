@@ -13,7 +13,7 @@ import {
 	PerformanceTimer,
 	measureAsync,
 	measure,
-} from "../helpers.js";
+} from "../helpers.ts";
 
 describe("Runnable Helpers", () => {
 	beforeEach(() => {
@@ -91,7 +91,7 @@ describe("Runnable Helpers", () => {
 
 			it("should include error object details", () => {
 				const testError = new Error("Something went wrong");
-				testError.stack = "Error: Something went wrong\n    at test.js:1:1";
+				testError.stack = "Error: Something went wrong\n    at test.ts:1:1";
 
 				const event = error("Operation failed", testError);
 
@@ -103,7 +103,7 @@ describe("Runnable Helpers", () => {
 					error: {
 						name: "Error",
 						message: "Something went wrong",
-						stack: "Error: Something went wrong\n    at test.js:1:1",
+						stack: "Error: Something went wrong\n    at test.ts:1:1",
 					},
 				});
 			});

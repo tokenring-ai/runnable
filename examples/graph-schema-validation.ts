@@ -1,5 +1,5 @@
 /**
- * @file examples/graph-schema-validation.js
+ * @file examples/graph-schema-validation.ts
  * @description Example demonstrating schema validation in RunnableGraph
  */
 
@@ -7,7 +7,7 @@ import { z } from "zod";
 import { Runnable, RunnableGraph } from "../index.js";
 
 // Create test runnables with different schemas
-class NumberProcessorRunnable extends Runnable {
+export class NumberProcessorRunnable extends Runnable<any, any, any, any> {
 	constructor() {
 		super({
 			name: "NumberProcessor",
@@ -22,7 +22,20 @@ class NumberProcessorRunnable extends Runnable {
 		});
 	}
 
-	async *invoke(input) {
+	async *invoke(input: any): AsyncGenerator<
+		{
+			type: string;
+			level: string;
+			message: string;
+			timestamp: number;
+			runnableName: string;
+		},
+		{
+			result: string;
+			processed: boolean;
+		},
+		unknown
+	> {
 		yield {
 			type: "log",
 			level: "info",
@@ -41,7 +54,7 @@ class NumberProcessorRunnable extends Runnable {
 	}
 }
 
-class StringFormatterRunnable extends Runnable {
+export class StringFormatterRunnable extends Runnable<any, any, any, any> {
 	constructor() {
 		super({
 			name: "StringFormatter",
@@ -57,7 +70,20 @@ class StringFormatterRunnable extends Runnable {
 		});
 	}
 
-	async *invoke(input) {
+	async *invoke(input: any): AsyncGenerator<
+		{
+			type: string;
+			level: string;
+			message: string;
+			timestamp: number;
+			runnableName: string;
+		},
+		{
+			message: string;
+			timestamp: number;
+		},
+		unknown
+	> {
 		yield {
 			type: "log",
 			level: "info",
@@ -74,7 +100,7 @@ class StringFormatterRunnable extends Runnable {
 }
 
 // Example of incompatible runnable
-class IncompatibleRunnable extends Runnable {
+export class IncompatibleRunnable extends Runnable<any, any, any, any> {
 	constructor() {
 		super({
 			name: "IncompatibleProcessor",
@@ -89,12 +115,18 @@ class IncompatibleRunnable extends Runnable {
 		});
 	}
 
-	async *invoke(input) {
+	async *invoke(input: any): AsyncGenerator<
+		never,
+		{
+			output: string;
+		},
+		unknown
+	> {
 		return { output: "processed" };
 	}
 }
 
-async function demonstrateCompatibleGraph() {
+export async function demonstrateCompatibleGraph(): Promise<void> {
 	console.log("=== COMPATIBLE GRAPH EXAMPLE ===");
 
 	const graph = new RunnableGraph({ name: "CompatibleProcessingGraph" });
@@ -115,7 +147,7 @@ async function demonstrateCompatibleGraph() {
 	try {
 		// Execute the graph
 		const generator = graph.invoke({ value: 42 });
-		const events = [];
+		const events: any[] = [];
 		let result;
 
 		for await (const event of generator) {
@@ -130,7 +162,7 @@ async function demonstrateCompatibleGraph() {
 	}
 }
 
-async function demonstrateIncompatibleGraph() {
+export async function demonstrateIncompatibleGraph(): Promise<void> {
 	console.log("\n=== INCOMPATIBLE GRAPH EXAMPLE ===");
 
 	const graph = new RunnableGraph({ name: "IncompatibleProcessingGraph" });
@@ -156,7 +188,7 @@ async function demonstrateIncompatibleGraph() {
 	}
 }
 
-async function demonstrateWarningScenarios() {
+export async function demonstrateWarningScenarios(): Promise<void> {
 	console.log("\n=== WARNING SCENARIOS ===");
 
 	// Scenario 1: Missing schemas
@@ -164,7 +196,7 @@ async function demonstrateWarningScenarios() {
 	const graphWithoutSchemas = new RunnableGraph({ name: "NoSchemaGraph" });
 
 	const noSchemaRunnable = new (class extends Runnable {
-		async *invoke(input) {
+		async *invoke(input: any) {
 			return input;
 		}
 	})();
@@ -197,7 +229,7 @@ async function demonstrateWarningScenarios() {
 			});
 		}
 
-		async *invoke(input) {
+		async *invoke(input: any) {
 			return { result: `Value: ${input.value}` };
 		}
 	})();
@@ -213,7 +245,7 @@ async function demonstrateWarningScenarios() {
 			});
 		}
 
-		async *invoke(input) {
+		async *invoke(input: any) {
 			return { final: input.result };
 		}
 	})();
@@ -238,7 +270,7 @@ async function demonstrateWarningScenarios() {
 	}
 }
 
-async function demonstrateHelp() {
+export async function demonstrateHelp(): Promise<void> {
 	console.log("\n=== RUNNABLE HELP EXAMPLES ===");
 
 	const processor = new NumberProcessorRunnable();
@@ -267,13 +299,3 @@ async function main() {
 if (import.meta.url === `file://${process.argv[1]}`) {
 	main().catch(console.error);
 }
-
-export {
-	NumberProcessorRunnable,
-	StringFormatterRunnable,
-	IncompatibleRunnable,
-	demonstrateCompatibleGraph,
-	demonstrateIncompatibleGraph,
-	demonstrateWarningScenarios,
-	demonstrateHelp,
-};

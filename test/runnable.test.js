@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { z } from "zod";
-import { Runnable } from "../runnable.js"; // Assuming runnable.js is in the parent directory
+import { Runnable } from "../runnable.ts"; // Assuming runnable.ts is in the parent directory
 // No need to import event types directly for these base tests, will check yielded objects.
 
 // Helper to consume a generator and collect events for testing
@@ -25,7 +25,7 @@ async function consumeGenerator(generator) {
 	return { events, returnValue };
 }
 
-describe("Runnable (core/runnable/runnable.js)", () => {
+describe("Runnable (core/runnable/runnable.ts)", () => {
 	describe("Constructor", () => {
 		it("should create an instance with a default AbortController if none is provided", () => {
 			const runnable = new Runnable();

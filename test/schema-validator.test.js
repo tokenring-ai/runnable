@@ -3,7 +3,7 @@ import { z } from "zod";
 import {
 	validateZodTypeCompatibility,
 	validateSchemaExists,
-} from "../schema-validator.js";
+} from "../schema-validator.ts";
 
 describe("Schema Validator", () => {
 	describe("validateSchemaExists", () => {
@@ -245,6 +245,11 @@ describe("Schema Validator", () => {
 			const inputSchema = z.string(); // string is compatible with one option
 
 			const result = validateZodTypeCompatibility(outputSchema, inputSchema);
+			console.log("Union compatible test result:", {
+				compatible: result.compatible,
+				warnings: result.warnings,
+				errors: result.errors,
+			});
 
 			expect(result.compatible).toBe(true);
 			expect(result.warnings.some((w) => w.includes("compatible option"))).toBe(
@@ -257,6 +262,11 @@ describe("Schema Validator", () => {
 			const inputSchema = z.number(); // number is not compatible with boolean or date
 
 			const result = validateZodTypeCompatibility(outputSchema, inputSchema);
+			console.log("Union incompatible test result:", {
+				compatible: result.compatible,
+				warnings: result.warnings,
+				errors: result.errors,
+			});
 
 			expect(result.compatible).toBe(false);
 			expect(

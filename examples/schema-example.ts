@@ -1,5 +1,5 @@
 /**
- * @file examples/schema-example.js
+ * @file examples/schema-example.ts
  * @description Example demonstrating the new Zod schema functionality in Runnable
  */
 
@@ -20,7 +20,7 @@ const outputSchema = z.object({
 });
 
 // Create a concrete implementation of Runnable
-class GreetingRunnable extends Runnable {
+export class GreetingRunnable extends Runnable<any, any, any, any> {
 	constructor() {
 		super({
 			name: "PersonalGreeting",
@@ -30,7 +30,20 @@ class GreetingRunnable extends Runnable {
 		});
 	}
 
-	async *invoke(input, context) {
+	async *invoke(
+		input: any,
+		context: any,
+	): AsyncGenerator<
+		{
+			type: string;
+			level: string;
+			message: string;
+			timestamp: number;
+			runnableName: string;
+		},
+		any,
+		unknown
+	> {
 		// Validate input using the schema
 		try {
 			const validatedInput = this.inputSchema.parse(input);
@@ -79,7 +92,7 @@ class GreetingRunnable extends Runnable {
 }
 
 // Example usage
-async function demonstrateSchemaRunnable() {
+export async function demonstrateSchemaRunnable(): Promise<void> {
 	const runnable = new GreetingRunnable();
 
 	// Display help information
@@ -97,7 +110,7 @@ async function demonstrateSchemaRunnable() {
 
 	try {
 		const generator = runnable.invoke(validInput);
-		const events = [];
+		const events: any[] = [];
 		let result;
 
 		for await (const event of generator) {
@@ -141,5 +154,3 @@ async function demonstrateSchemaRunnable() {
 if (import.meta.url === `file://${process.argv[1]}`) {
 	demonstrateSchemaRunnable().catch(console.error);
 }
-
-export { GreetingRunnable, demonstrateSchemaRunnable };

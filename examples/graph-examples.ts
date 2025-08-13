@@ -1,5 +1,5 @@
 /**
- * @file core/runnable/examples/graph-examples.js
+ * @file core/runnable/examples/graph-examples.ts
  * @description Practical examples demonstrating RunnableGraph usage patterns.
  */
 
@@ -12,12 +12,17 @@ import { Runnable } from "../runnable.js";
  * A runnable that validates input data.
  */
 class ValidationRunnable extends Runnable {
+	rules: {
+		required?: string[];
+		minLength?: Record<string, number>;
+	};
+
 	constructor(rules = {}) {
 		super({ name: "Validator" });
 		this.rules = rules;
 	}
 
-	async *invoke(input, context) {
+	async *invoke(input: any, context: any) {
 		yield {
 			type: "log",
 			level: "info",
@@ -26,7 +31,7 @@ class ValidationRunnable extends Runnable {
 			runnableName: this.name,
 		};
 
-		const errors = [];
+		const errors: string[] = [];
 
 		if (this.rules.required) {
 			for (const field of this.rules.required) {
@@ -73,12 +78,14 @@ class ValidationRunnable extends Runnable {
  * A runnable that transforms data.
  */
 class TransformRunnable extends Runnable {
-	constructor(name, transformFn) {
+	transformFn: (input: any) => Promise<any> | any;
+
+	constructor(name: string, transformFn: (input: any) => Promise<any> | any) {
 		super({ name });
 		this.transformFn = transformFn;
 	}
 
-	async *invoke(input, context) {
+	async *invoke(input: any, context: any) {
 		yield {
 			type: "log",
 			level: "info",
@@ -104,12 +111,14 @@ class TransformRunnable extends Runnable {
  * A runnable that enriches data with external information.
  */
 class EnrichmentRunnable extends Runnable {
-	constructor(enrichmentSource) {
+	enrichmentSource: any;
+
+	constructor(enrichmentSource: any) {
 		super({ name: "Enricher" });
 		this.enrichmentSource = enrichmentSource;
 	}
 
-	async *invoke(input, context) {
+	async *invoke(input: any, context: any) {
 		yield {
 			type: "log",
 			level: "info",
@@ -143,12 +152,14 @@ class EnrichmentRunnable extends Runnable {
  * A runnable that aggregates multiple inputs.
  */
 class AggregatorRunnable extends Runnable {
+	strategy: string;
+
 	constructor(aggregationStrategy = "merge") {
 		super({ name: "Aggregator" });
 		this.strategy = aggregationStrategy;
 	}
 
-	async *invoke(input, context) {
+	async *invoke(input: any, context: any) {
 		yield {
 			type: "log",
 			level: "info",
@@ -157,7 +168,7 @@ class AggregatorRunnable extends Runnable {
 			runnableName: this.name,
 		};
 
-		let result;
+		let result: any;
 
 		if (this.strategy === "merge") {
 			result = Object.assign({}, ...Object.values(input));
@@ -183,12 +194,14 @@ class AggregatorRunnable extends Runnable {
  * A runnable that splits data into multiple outputs.
  */
 class SplitterRunnable extends Runnable {
-	constructor(splitRules) {
+	splitRules: Record<string, any>;
+
+	constructor(splitRules: Record<string, any>) {
 		super({ name: "Splitter" });
 		this.splitRules = splitRules;
 	}
 
-	async *invoke(input, context) {
+	async *invoke(input: any, context: any) {
 		yield {
 			type: "log",
 			level: "info",
@@ -197,7 +210,7 @@ class SplitterRunnable extends Runnable {
 			runnableName: this.name,
 		};
 
-		const outputs = {};
+		const outputs: Record<string, any> = {};
 
 		for (const [outputKey, rule] of Object.entries(this.splitRules)) {
 			if (typeof rule === "function") {
@@ -222,7 +235,7 @@ class SplitterRunnable extends Runnable {
 }
 
 // Example 1: Simple Linear Pipeline
-export async function simpleLinearPipeline() {
+export async function simpleLinearPipeline(): Promise<any> {
 	console.log("\n=== Simple Linear Pipeline Example ===");
 
 	const validator = new ValidationRunnable({
@@ -258,7 +271,7 @@ export async function simpleLinearPipeline() {
 
 	try {
 		const generator = pipeline.invoke(input);
-		const events = [];
+		const events: any[] = [];
 		let result;
 
 		for await (const event of generator) {
@@ -283,18 +296,18 @@ export async function simpleLinearPipeline() {
 }
 
 // Example 2: Fan-out/Fan-in Pattern
-export async function fanOutFanInPattern() {
+export async function fanOutFanInPattern(): Promise<any> {
 	console.log("\n=== Fan-out/Fan-in Pattern Example ===");
 
 	const splitter = new SplitterRunnable({
-		personalInfo: (input) => ({ name: input.name, age: input.age }),
-		contactInfo: (input) => ({ email: input.email, phone: input.phone }),
-		metadata: (input) => ({ id: input.id, timestamp: Date.now() }),
+		personalInfo: (input: any) => ({ name: input.name, age: input.age }),
+		contactInfo: (input: any) => ({ email: input.email, phone: input.phone }),
+		metadata: (input: any) => ({ id: input.id, timestamp: Date.now() }),
 	});
 
 	const personalProcessor = new TransformRunnable(
 		"PersonalProcessor",
-		(input) => ({
+		(input: any) => ({
 			...input,
 			fullName: input.name.toUpperCase(),
 			ageGroup: input.age < 18 ? "minor" : input.age < 65 ? "adult" : "senior",
@@ -303,7 +316,7 @@ export async function fanOutFanInPattern() {
 
 	const contactProcessor = new TransformRunnable(
 		"ContactProcessor",
-		(input) => ({
+		(input: any) => ({
 			...input,
 			emailDomain: input.email ? input.email.split("@")[1] : null,
 			hasPhone: !!input.phone,
@@ -312,7 +325,7 @@ export async function fanOutFanInPattern() {
 
 	const metadataProcessor = new TransformRunnable(
 		"MetadataProcessor",
-		(input) => ({
+		(input: any) => ({
 			...input,
 			processedAt: new Date(input.timestamp).toISOString(),
 			hash: `${input.id}-${input.timestamp}`,
@@ -357,7 +370,7 @@ export async function fanOutFanInPattern() {
 
 	try {
 		const generator = pipeline.invoke(input);
-		const events = [];
+		const events: any[] = [];
 		let result;
 
 		for await (const event of generator) {
@@ -379,14 +392,14 @@ export async function fanOutFanInPattern() {
 }
 
 // Example 3: Conditional Processing with Error Handling
-export async function conditionalProcessingWithErrorHandling() {
+export async function conditionalProcessingWithErrorHandling(): Promise<void> {
 	console.log("\n=== Conditional Processing with Error Handling Example ===");
 
 	const validator = new ValidationRunnable({
 		required: ["type", "data"],
 	});
 
-	const typeAProcessor = new TransformRunnable("TypeAProcessor", (input) => {
+	const typeAProcessor = new TransformRunnable("TypeAProcessor", (input: any) => {
 		if (input.type !== "A") throw new Error("Not type A");
 		return {
 			...input,
@@ -395,7 +408,7 @@ export async function conditionalProcessingWithErrorHandling() {
 		};
 	});
 
-	const typeBProcessor = new TransformRunnable("TypeBProcessor", (input) => {
+	const typeBProcessor = new TransformRunnable("TypeBProcessor", (input: any) => {
 		if (input.type !== "B") throw new Error("Not type B");
 		return {
 			...input,
@@ -406,7 +419,7 @@ export async function conditionalProcessingWithErrorHandling() {
 
 	const fallbackProcessor = new TransformRunnable(
 		"FallbackProcessor",
-		(input) => ({
+		(input: any) => ({
 			...input,
 			processedBy: "FallbackProcessor",
 			result: `Unknown type: ${input.type}`,
@@ -445,7 +458,7 @@ export async function conditionalProcessingWithErrorHandling() {
 
 		try {
 			const generator = pipeline.invoke(input);
-			const events = [];
+			const events: any[] = [];
 			let result;
 
 			for await (const event of generator) {
@@ -468,7 +481,7 @@ export async function conditionalProcessingWithErrorHandling() {
 }
 
 // Example 4: Real-world Data Processing Pipeline
-export async function realWorldDataProcessingPipeline() {
+export async function realWorldDataProcessingPipeline(): Promise<any> {
 	console.log("\n=== Real-world Data Processing Pipeline Example ===");
 
 	// Simulate a data processing pipeline for e-commerce orders
@@ -479,10 +492,10 @@ export async function realWorldDataProcessingPipeline() {
 
 	const inventoryChecker = new TransformRunnable(
 		"InventoryChecker",
-		async (input) => {
+		async (input: any) => {
 			// Simulate inventory check
 			await new Promise((resolve) => setTimeout(resolve, 50));
-			const availableItems = input.items.map((item) => ({
+			const availableItems = input.items.map((item: any) => ({
 				...item,
 				available: Math.random() > 0.1, // 90% availability
 			}));
@@ -490,9 +503,9 @@ export async function realWorldDataProcessingPipeline() {
 		},
 	);
 
-	const priceCalculator = new TransformRunnable("PriceCalculator", (input) => {
+	const priceCalculator = new TransformRunnable("PriceCalculator", (input: any) => {
 		const subtotal = input.items.reduce(
-			(sum, item) => sum + item.price * item.quantity,
+			(sum: number, item: any) => sum + item.price * item.quantity,
 			0,
 		);
 		const tax = subtotal * 0.08;
@@ -508,7 +521,7 @@ export async function realWorldDataProcessingPipeline() {
 
 	const paymentProcessor = new TransformRunnable(
 		"PaymentProcessor",
-		async (input) => {
+		async (input: any) => {
 			// Simulate payment processing
 			await new Promise((resolve) => setTimeout(resolve, 100));
 			const paymentSuccess = Math.random() > 0.05; // 95% success rate
@@ -528,7 +541,7 @@ export async function realWorldDataProcessingPipeline() {
 		},
 	);
 
-	const fulfillmentPrep = new TransformRunnable("FulfillmentPrep", (input) => ({
+	const fulfillmentPrep = new TransformRunnable("FulfillmentPrep", (input: any) => ({
 		...input,
 		fulfillment: {
 			status: "ready",
@@ -541,7 +554,7 @@ export async function realWorldDataProcessingPipeline() {
 
 	const notificationSender = new TransformRunnable(
 		"NotificationSender",
-		async (input) => {
+		async (input: any) => {
 			// Simulate sending notifications
 			await new Promise((resolve) => setTimeout(resolve, 30));
 			return {
@@ -598,7 +611,7 @@ export async function realWorldDataProcessingPipeline() {
 	try {
 		const startTime = Date.now();
 		const generator = pipeline.invoke(sampleOrder);
-		const events = [];
+		const events: any[] = [];
 		let result;
 
 		for await (const event of generator) {
@@ -625,7 +638,7 @@ export async function realWorldDataProcessingPipeline() {
 }
 
 // Main function to run all examples
-export async function runAllExamples() {
+export async function runAllExamples(): Promise<void> {
 	try {
 		await simpleLinearPipeline();
 		await fanOutFanInPattern();

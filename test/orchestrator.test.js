@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { Runnable } from "../runnable.js";
-import { RunnableGraph } from "../graph.js";
-import { GraphOrchestrator } from "../orchestrator.js";
+import { Runnable } from "../runnable.ts";
+import { RunnableGraph } from "../graph.ts";
+import { GraphOrchestrator } from "../orchestrator.ts";
 
 // Helper to consume generator
 async function consumeGenerator(gen) {
@@ -60,6 +60,11 @@ describe("GraphOrchestrator", () => {
 
 		class DynamicOrchestrator extends GraphOrchestrator {
 			async updateGraph({ graph, persistence }) {
+				// Ensure completedNodes exists and is an array
+				if (!persistence.completedNodes) {
+					persistence.completedNodes = [];
+				}
+
 				if (
 					persistence.completedNodes.includes("n2") &&
 					!graph.describe().nodes.includes("n3")
@@ -93,6 +98,11 @@ describe("GraphOrchestrator", () => {
 
 		class DynamicOrchestrator extends GraphOrchestrator {
 			async updateGraph({ graph, persistence }) {
+				// Ensure completedNodes exists and is an array
+				if (!persistence.completedNodes) {
+					persistence.completedNodes = [];
+				}
+
 				if (
 					persistence.completedNodes.includes("n2") &&
 					!graph.describe().nodes.includes("n3")
@@ -106,7 +116,7 @@ describe("GraphOrchestrator", () => {
 		}
 
 		const orch = new DynamicOrchestrator(graph);
-		const state = {};
+		const state = { completedNodes: [] };
 		const gen = orch.invoke(0, { persistence: state });
 		let r = await gen.next();
 		while (!r.done) {

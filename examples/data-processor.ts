@@ -16,14 +16,34 @@ import {
 /**
  * Example data processing runnable that demonstrates all helper functions
  */
-export class DataProcessorRunnable extends Runnable {
-	constructor(options = {}) {
+export class DataProcessorRunnable extends Runnable<any, any, any, any> {
+	batchSize: number;
+	maxRetries: number;
+
+	constructor(options: Record<string, any> = {}) {
 		super({ name: "DataProcessor", ...options });
 		this.batchSize = options.batchSize || 100;
 		this.maxRetries = options.maxRetries || 3;
 	}
 
-	async *invoke(input, context) {
+	async *invoke(
+		input: any,
+		context: any,
+	): AsyncGenerator<
+		any,
+		| {
+				processed: any;
+				skipped: number;
+				errors: number;
+				total: number;
+		  }
+		| {
+				processed: any[];
+				skipped: number;
+				errors: number;
+		  },
+		unknown
+	> {
 		yield info("Starting data processing", {
 			inputSize: input?.length || 0,
 			batchSize: this.batchSize,
@@ -44,7 +64,7 @@ export class DataProcessorRunnable extends Runnable {
 			}
 
 			// Process data in batches
-			const results = [];
+			const results: any[] = [];
 			let totalSkipped = 0;
 			let totalErrors = 0;
 
@@ -128,11 +148,19 @@ export class DataProcessorRunnable extends Runnable {
 	 * @param {number} batchNumber - Batch number for logging
 	 * @returns {Promise<{processed: Array, skipped: number, errors: number, events: Array}>}
 	 */
-	async processBatch(batch, batchNumber) {
-		const processed = [];
+	async processBatch(
+		batch: any[],
+		batchNumber: number,
+	): Promise<{
+		processed: any[];
+		skipped: number;
+		errors: number;
+		events: any[];
+	}> {
+		const processed: any[] = [];
 		let skipped = 0;
 		let errors = 0;
-		const events = [];
+		const events: any[] = [];
 
 		const itemTimer = createPerformanceTimer("Item Processing");
 
@@ -212,7 +240,7 @@ export class DataProcessorRunnable extends Runnable {
 	 * @param {any} item - Item to process
 	 * @returns {Promise<any>} Processed item
 	 */
-	async processItem(item) {
+	async processItem(item: any): Promise<any> {
 		// Simulate item processing with retries
 		let attempts = 0;
 
@@ -245,7 +273,7 @@ export class DataProcessorRunnable extends Runnable {
 	 * @param {Array} results - Processed results
 	 * @returns {Array} Validated results
 	 */
-	validateResults(results) {
+	validateResults(results: any[]): any[] {
 		// Simulate validation logic
 		const { result: validatedResults } = measure("Result Validation", () => {
 			return results.filter((item) => item !== null && item !== undefined);
@@ -258,7 +286,7 @@ export class DataProcessorRunnable extends Runnable {
 /**
  * Example usage function
  */
-export async function runDataProcessorExample() {
+export async function runDataProcessorExample(): Promise<any> {
 	const processor = new DataProcessorRunnable({
 		batchSize: 5,
 		maxRetries: 2,
