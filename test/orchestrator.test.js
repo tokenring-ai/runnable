@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { Runnable } from "../runnable.ts";
 import { RunnableGraph } from "../graph.ts";
 import { GraphOrchestrator } from "../orchestrator.ts";

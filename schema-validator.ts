@@ -3,7 +3,7 @@
  * @description Provides utilities for validating Zod schema compatibility between runnables
  */
 
-import { z } from 'zod';
+import {z} from 'zod';
 
 /**
  * Result of schema validation

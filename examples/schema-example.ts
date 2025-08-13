@@ -3,8 +3,8 @@
  * @description Example demonstrating the new Zod schema functionality in Runnable
  */
 
-import { z } from "zod";
-import { Runnable } from "../runnable.js";
+import {z} from "zod";
+import {Runnable} from "../runnable.js";
 
 // Define input and output schemas
 const inputSchema = z.object({
@@ -20,7 +20,7 @@ const outputSchema = z.object({
 });
 
 // Create a concrete implementation of Runnable
-export class GreetingRunnable extends Runnable<any, any, any, any> {
+export class GreetingRunnable extends Runnable {
 	constructor() {
 		super({
 			name: "PersonalGreeting",

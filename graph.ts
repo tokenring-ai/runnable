@@ -3,13 +3,10 @@
  * @description Implements a graph-based runnable that can orchestrate multiple interconnected runnables.
  */
 
-import { Runnable } from "./runnable.js";
-import {
-    validateSchemaExists,
-    validateZodTypeCompatibility,
-} from "./schema-validator.js";
-import { RunnableGraphBuilder } from "./graphBuilder.js";
-import { LogEvent, ErrorEvent, BaseYieldType } from "./events.js";
+import {Runnable} from "./runnable.js";
+import {validateSchemaExists, validateZodTypeCompatibility,} from "./schema-validator.js";
+import {RunnableGraphBuilder} from "./graphBuilder.js";
+import {ErrorEvent, LogEvent} from "./events.js";
 
 /**
  * Node in a runnable graph
@@ -22,7 +19,7 @@ export type GraphNode = {
     /**
      * The runnable instance for this node
      */
-    runnable: Runnable<any, any, any, any>;
+    runnable: Runnable;
     /**
      * Array of input keys this node expects
      */
@@ -229,7 +226,7 @@ export class RunnableGraph<
      */
     addNode(
         id: string,
-        runnable: Runnable<any, any, any, any>,
+        runnable: Runnable,
         config: {
             inputs?: string[];
             outputs?: string[];
@@ -382,6 +379,7 @@ export class RunnableGraph<
      * Invokes the graph, executing all nodes according to their dependencies.
      * @param input - Input for the graph
      * @param context - Context for the graph execution
+     * @param persistence
      * @returns The final output from the exit nodes
      */
     async *invoke(
@@ -969,12 +967,10 @@ export class RunnableGraph<
         }
 
         // For nodes with expected inputs but no mappings, they can't execute
-        if (node.inputs.length > 0 && Object.keys(node.inputMappings).length === 0 && 
-            nodeId !== "start" && !this.#entryNodes.includes(nodeId)) {
-            return false;
-        }
+        return !(node.inputs.length > 0 && Object.keys(node.inputMappings).length === 0 &&
+            nodeId !== "start" && !this.#entryNodes.includes(nodeId));
 
-        return true;
+
     }
 
     /**

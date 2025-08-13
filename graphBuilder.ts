@@ -1,5 +1,5 @@
-import { RunnableGraph, RunnableGraphOptions } from "./graph.js";
-import { Runnable } from "./runnable.js";
+import {RunnableGraph, RunnableGraphOptions} from "./graph.js";
+import {Runnable} from "./runnable.js";
 
 /**
  * Builder class for constructing RunnableGraph instances with a fluent API.
@@ -8,7 +8,7 @@ export class RunnableGraphBuilder {
     /**
      * The graph being built
      */
-    #graph: RunnableGraph<any, any, any, any>;
+    private readonly #graph: RunnableGraph;
 
     /**
      * Creates a new builder instance.
@@ -66,7 +66,7 @@ export class RunnableGraphBuilder {
      * Builds and returns the configured graph.
      * @returns The constructed graph
      */
-    build(): RunnableGraph<any, any, any, any> {
+    build(): RunnableGraph {
         return this.#graph;
     }
 }

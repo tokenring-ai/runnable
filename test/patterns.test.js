@@ -1,8 +1,8 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
-	MapRunnable,
-	FilterRunnable,
 	ConditionalRunnable,
+	FilterRunnable,
+	MapRunnable,
 	ParallelJoinRunnable,
 } from "../patterns.ts";
 import { Runnable } from "../runnable.ts";

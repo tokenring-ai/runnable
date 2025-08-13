@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
-import { LogEvent, ChunkEvent, ErrorEvent } from "../events.ts";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { ChunkEvent, ErrorEvent, LogEvent } from "../events.ts";
 
 describe("Event factory helpers", () => {
 	beforeEach(() => {

@@ -2,17 +2,17 @@
  * @fileoverview Tests for runnable helper functions
  */
 
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
-	info,
-	warning,
+	createPerformanceTimer,
 	error,
 	fatal,
-	performance as performanceHelper,
-	createPerformanceTimer,
-	PerformanceTimer,
-	measureAsync,
+	info,
 	measure,
+	measureAsync,
+	performance as performanceHelper,
+	PerformanceTimer,
+	warning,
 } from "../helpers.ts";
 
 describe("Runnable Helpers", () => {

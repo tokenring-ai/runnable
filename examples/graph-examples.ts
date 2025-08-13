@@ -3,8 +3,8 @@
  * @description Practical examples demonstrating RunnableGraph usage patterns.
  */
 
-import { RunnableGraph } from "../graph.js";
-import { Runnable } from "../runnable.js";
+import {RunnableGraph} from "../graph.js";
+import {Runnable} from "../runnable.js";
 
 // Example Runnable implementations for demonstrations
 
@@ -653,5 +653,6 @@ export async function runAllExamples(): Promise<void> {
 
 // Run examples if this file is executed directly
 if (import.meta.url === `file://${process.argv[1]}`) {
-	runAllExamples();
+	// noinspection JSIgnoredPromiseFromCall
+    runAllExamples();
 }

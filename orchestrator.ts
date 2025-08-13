@@ -1,17 +1,17 @@
-import { Runnable, RunnableOptions } from "./runnable.js";
-import { RunnableGraph, RunnableGraphOptions } from "./graph.js";
-import { LogEvent, BaseYieldType } from "./events.js";
+import {Runnable, RunnableOptions} from "./runnable.js";
+import {RunnableGraph, RunnableGraphOptions} from "./graph.js";
+import {BaseYieldType, LogEvent} from "./events.js";
 
 /**
  * Runnable orchestrator that executes a RunnableGraph and can
  * dynamically add nodes after each run based on persisted results.
  * Completed nodes are not rerun thanks to the graph's persistence layer.
  */
-export class GraphOrchestrator extends Runnable<any, any, any, any> {
+export class GraphOrchestrator extends Runnable {
     /**
      * The graph being orchestrated
      */
-    graph: RunnableGraph<any, any, any, any>;
+    graph: RunnableGraph;
     
     /**
      * Persistence state to track completed nodes
@@ -23,7 +23,7 @@ export class GraphOrchestrator extends Runnable<any, any, any, any> {
      * @param options - Options for the runnable
      */
     constructor(
-        graph: RunnableGraph<any, any, any, any> = new RunnableGraph(), 
+        graph: RunnableGraph = new RunnableGraph(),
         options: RunnableOptions = {}
     ) {
         super(options);
@@ -45,7 +45,7 @@ export class GraphOrchestrator extends Runnable<any, any, any, any> {
         output,
         context,
     }: {
-        graph: RunnableGraph<any, any, any, any>;
+        graph: RunnableGraph;
         persistence: any;
         input: any;
         output: any;
@@ -119,7 +119,7 @@ export class GraphOrchestratorBuilder {
     /**
      * The underlying graph being built
      */
-    #graph: RunnableGraph<any, any, any, any>;
+    private readonly #graph: RunnableGraph;
 
     /**
      * @param options - Graph options
@@ -137,7 +137,7 @@ export class GraphOrchestratorBuilder {
      */
     node(
         id: string,
-        runnable: Runnable<any, any, any, any>,
+        runnable: Runnable,
         config?: Record<string, any>
     ): GraphOrchestratorBuilder {
         this.#graph.addNode(id, runnable, config);

@@ -3,8 +3,8 @@
  * @description Defines the core Runnable class/interface.
  */
 
-import { z } from "zod";
-import { LogEvent } from "./events.js";
+import {z} from "zod";
+import {LogEvent} from "./events.js";
 
 /**
  * Configuration options for a Runnable instance.

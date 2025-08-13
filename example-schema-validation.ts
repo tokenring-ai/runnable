@@ -2,9 +2,9 @@
  * Example demonstrating schema validation in RunnableGraph
  */
 
-import { z } from "zod";
-import { Runnable } from "./runnable.js";
-import { RunnableGraph } from "./graph.js";
+import {z} from "zod";
+import {Runnable} from "./runnable.js";
+import {RunnableGraph} from "./graph.js";
 
 // Create a runnable with optional output
 class NodeA extends Runnable {

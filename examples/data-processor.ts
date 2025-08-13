@@ -2,21 +2,13 @@
  * @fileoverview Example runnable demonstrating the use of helper functions
  */
 
-import { Runnable } from "../runnable.js";
-import {
-	info,
-	warning,
-	error,
-	fatal,
-	createPerformanceTimer,
-	measureAsync,
-	measure,
-} from "../helpers.js";
+import {Runnable} from "../runnable.js";
+import {createPerformanceTimer, error, fatal, info, measure, measureAsync, warning,} from "../helpers.js";
 
 /**
  * Example data processing runnable that demonstrates all helper functions
  */
-export class DataProcessorRunnable extends Runnable<any, any, any, any> {
+export class DataProcessorRunnable extends Runnable {
 	batchSize: number;
 	maxRetries: number;
 

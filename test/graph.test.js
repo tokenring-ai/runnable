@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import { RunnableGraph } from "../graph.ts";
 import { Runnable } from "../runnable.ts";

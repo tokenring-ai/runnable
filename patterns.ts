@@ -1,10 +1,10 @@
-import { Runnable, RunnableOptions } from "./runnable.js";
-import { ChunkEvent } from "./events.js";
+import {Runnable, RunnableOptions} from "./runnable.js";
+import {ChunkEvent} from "./events.js";
 
 /**
  * Runnable that applies a mapping function to each item of an input array.
  */
-export class MapRunnable extends Runnable<any, any, any, any> {
+export class MapRunnable extends Runnable {
 	/**
 	 * @param mapFn Function that maps each input item
 	 * @param options Optional runnable options
@@ -33,7 +33,7 @@ export class MapRunnable extends Runnable<any, any, any, any> {
 /**
  * Runnable that filters an input array using a predicate function.
  */
-export class FilterRunnable extends Runnable<any, any, any, any> {
+export class FilterRunnable extends Runnable {
 	/**
 	 * @param filterFn Function that determines which items to keep
 	 * @param options Optional runnable options
@@ -63,7 +63,7 @@ export class FilterRunnable extends Runnable<any, any, any, any> {
 /**
  * Runnable that chooses between two runnables based on a predicate.
  */
-export class ConditionalRunnable extends Runnable<any, any, any, any> {
+export class ConditionalRunnable extends Runnable {
 	/**
 	 * @param predicate Function that determines which branch to take
 	 * @param trueRunnable Runnable to use when predicate returns true
@@ -72,8 +72,8 @@ export class ConditionalRunnable extends Runnable<any, any, any, any> {
 	 */
 	constructor(
 		public predicate: (input: any, context: any) => boolean | Promise<boolean>,
-		public trueRunnable: Runnable<any, any, any, any>,
-		public falseRunnable?: Runnable<any, any, any, any>,
+		public trueRunnable: Runnable,
+		public falseRunnable?: Runnable,
 		options?: RunnableOptions
 	) {
 		super(options);
@@ -98,14 +98,14 @@ export class ConditionalRunnable extends Runnable<any, any, any, any> {
 /**
  * Runnable that executes multiple runnables in parallel and combines their outputs.
  */
-export class ParallelJoinRunnable extends Runnable<any, any, any, any> {
+export class ParallelJoinRunnable extends Runnable {
 	/**
 	 * @param runnables Array of runnables to execute in parallel
 	 * @param combineFn Optional function to combine the outputs
 	 * @param options Optional runnable options
 	 */
 	constructor(
-		public runnables: Runnable<any, any, any, any>[],
+		public runnables: Runnable[],
 		public combineFn?: (outputs: any[]) => any,
 		options?: RunnableOptions
 	) {

@@ -2,18 +2,15 @@
 	"name": "@token-ring/runnable",
 	"version": "0.1.0",
 	"description": "Core Runnable interface and base types for creating executable, streamable operations.",
-	"main": "index.js",
+	"main": "index.ts",
 	"types": "./index.d.ts",
 	"type": "module",
 	"license": "MIT",
 	"exports": {
-		".": "./index.js",
-		"./*": "./*.js"
+		".": "./index.ts",
+		"./*": "./*.ts"
 	},
 	"scripts": {
-		"build": "tsc -p .",
-		"lint": "eslint .",
-		"eslint": "eslint --fix ./",
 		"test": "vitest run",
 		"test:watch": "vitest"
 	},

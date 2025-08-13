@@ -3,11 +3,11 @@
  * @description Example demonstrating schema validation in RunnableGraph
  */
 
-import { z } from "zod";
-import { Runnable, RunnableGraph } from "../index.js";
+import {z} from "zod";
+import {Runnable, RunnableGraph} from "../index.js";
 
 // Create test runnables with different schemas
-export class NumberProcessorRunnable extends Runnable<any, any, any, any> {
+export class NumberProcessorRunnable extends Runnable {
 	constructor() {
 		super({
 			name: "NumberProcessor",
@@ -54,7 +54,7 @@ export class NumberProcessorRunnable extends Runnable<any, any, any, any> {
 	}
 }
 
-export class StringFormatterRunnable extends Runnable<any, any, any, any> {
+export class StringFormatterRunnable extends Runnable {
 	constructor() {
 		super({
 			name: "StringFormatter",
@@ -100,7 +100,7 @@ export class StringFormatterRunnable extends Runnable<any, any, any, any> {
 }
 
 // Example of incompatible runnable
-export class IncompatibleRunnable extends Runnable<any, any, any, any> {
+export class IncompatibleRunnable extends Runnable {
 	constructor() {
 		super({
 			name: "IncompatibleProcessor",
