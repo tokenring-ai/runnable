@@ -198,12 +198,12 @@ export class Runnable<InputType = any, OutputType = any, YieldType = any, Contex
         } else if (schema instanceof z.ZodOptional) {
             return `${this._formatZodSchema(schema.unwrap())} (optional)`;
         } else if (schema instanceof z.ZodUnion) {
-            const options = schema.options.map((opt) => this._formatZodSchema(opt));
+            const options = schema.options.map((opt: z.ZodTypeAny) => this._formatZodSchema(opt));
             return options.join(" | ");
         } else if (schema instanceof z.ZodLiteral) {
             return `"${schema.value}"`;
         } else if (schema instanceof z.ZodEnum) {
-            return schema.options.map((opt) => `"${opt}"`).join(" | ");
+            return schema.options.map((opt: string) => `"${opt}"`).join(" | ");
         } else {
             // Fallback for other schema types
             return schema.constructor.name.replace("Zod", "").toLowerCase();
