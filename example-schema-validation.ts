@@ -18,7 +18,7 @@ class NodeA extends Runnable {
     result: z.string().optional(), // Optional output
   });
 
-  async* invoke(input) {
+  async* invoke(input: any) {
     yield {type: "log", message: "Node A processing..."};
     return {result: `Processed: ${input.value}`};
   }
@@ -36,7 +36,7 @@ class NodeB extends Runnable {
     final: z.string(),
   });
 
-  async* invoke(input) {
+  async* invoke(input: any) {
     yield {type: "log", message: "Node B processing..."};
     return {final: `Final: ${input.result}`};
   }
@@ -62,8 +62,9 @@ try {
   const firstEvent = await generator.next();
   console.log("Graph started successfully");
   console.log("First event:", firstEvent.value);
-} catch (error) {
-  console.error("Error:", error.message);
+} catch (error: unknown) {
+  const msg = error instanceof Error ? error.message : String(error);
+  console.error("Error:", msg);
 }
 
 console.log(

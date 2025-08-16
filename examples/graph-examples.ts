@@ -290,7 +290,7 @@ export async function simpleLinearPipeline(): Promise<any> {
     console.log("Final Result:", result);
     return result;
   } catch (error) {
-    console.error("Pipeline failed:", error.message);
+    console.error("Pipeline failed:", error instanceof Error ? error.message : String(error));
     throw error;
   }
 }
@@ -386,7 +386,7 @@ export async function fanOutFanInPattern(): Promise<any> {
     console.log("Final Result:", result);
     return result;
   } catch (error) {
-    console.error("Pipeline failed:", error.message);
+    console.error("Pipeline failed:", error instanceof Error ? error.message : String(error));
     throw error;
   }
 }
@@ -475,7 +475,7 @@ export async function conditionalProcessingWithErrorHandling(): Promise<void> {
 
       console.log("Result:", result);
     } catch (error) {
-      console.error("Pipeline failed:", error.message);
+      console.error("Pipeline failed:", error instanceof Error ? error.message : String(error));
     }
   }
 }
@@ -632,7 +632,7 @@ export async function realWorldDataProcessingPipeline(): Promise<any> {
 
     return result;
   } catch (error) {
-    console.error("Order processing failed:", error.message);
+    console.error("Order processing failed:", error instanceof Error ? error.message : String(error));
     throw error;
   }
 }

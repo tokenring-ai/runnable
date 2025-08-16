@@ -8,7 +8,7 @@ export class RunnableGraphBuilder {
   /**
    * The graph being built
    */
-  private readonly #graph: RunnableGraph;
+  readonly #graph: RunnableGraph;
 
   /**
    * Creates a new builder instance.

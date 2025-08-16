@@ -10,7 +10,7 @@
 		"emitDeclarationOnly": true,
 		"allowJs": true,
 		"checkJs": false,
-		"strict": false,
+		"strict": true,
 		"skipLibCheck": true,
 		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,

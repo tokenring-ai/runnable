@@ -71,23 +71,23 @@ export type GraphPersistence = {
   /**
    * Persisted results of completed nodes
    */
-  nodeResults?: Record<string, any>;
+  nodeResults: Record<string, any>;
   /**
    * Persisted named outputs from nodes
    */
-  nodeOutputs?: Record<string, any>;
+  nodeOutputs: Record<string, any>;
   /**
    * Persisted errors for failed nodes
    */
-  nodeErrors?: Record<string, { name: string, message: string, stack?: string }>;
+  nodeErrors: Record<string, { name: string, message: string, stack?: string }>;
   /**
    * IDs of completed nodes
    */
-  completedNodes?: string[];
+  completedNodes: string[];
   /**
    * IDs of failed nodes
    */
-  failedNodes?: string[];
+  failedNodes: string[];
 };
 
 /**
@@ -407,16 +407,16 @@ export class RunnableGraph<
       };
     } else {
       // Ensure the persistence object has all required fields
-      if (!persistence.completedNodes) persistence.completedNodes = [];
-      if (!persistence.failedNodes) persistence.failedNodes = [];
-      if (!persistence.nodeResults) persistence.nodeResults = {};
-      if (!persistence.nodeOutputs) persistence.nodeOutputs = {};
-      if (!persistence.nodeErrors) persistence.nodeErrors = {};
+      persistence.completedNodes = persistence.completedNodes || [];
+      persistence.failedNodes = persistence.failedNodes || [];
+      persistence.nodeResults = persistence.nodeResults || {};
+      persistence.nodeOutputs = persistence.nodeOutputs || {};
+      persistence.nodeErrors = persistence.nodeErrors || {};
     }
 
     // Make sure persistence reference is maintained in context without overwriting external reference
-    context = context || {} as any;
-    (context as any).persistence = persistence;
+    const safeContext = context || {} as ContextType;
+    (safeContext as any).persistence = persistence;
 
     // Create execution context
     const executionContext: GraphExecutionContext = {
@@ -426,7 +426,7 @@ export class RunnableGraph<
       failedNodes: new Set(),
       nodeErrors: new Map(),
       graphInput: input,
-      graphContext: context || {},
+      graphContext: safeContext,
       persistence: persistence,
     };
 
@@ -488,7 +488,7 @@ export class RunnableGraph<
           nodeProcessingOrder,
           executionContext,
           input,
-          context,
+          safeContext,
           yieldEvent
         );
       } else {
@@ -496,7 +496,7 @@ export class RunnableGraph<
           nodeProcessingOrder,
           executionContext,
           input,
-          context,
+          safeContext,
           yieldEvent
         );
       }
@@ -520,15 +520,17 @@ export class RunnableGraph<
       // Gather output from exit nodes
       return this.#collectOutput(executionContext) as OutputType;
     } catch (error) {
+      const typedError = error as Error;
+
       // Log the error
       yield new LogEvent(
         "error",
-        `Graph execution failed: ${error.message}`,
+        `Graph execution failed: ${typedError.message}`,
         {runnableName: this.name}
       ) as YieldType;
 
       // Yield the error as an event
-      yield new ErrorEvent(error, {runnableName: this.name}) as unknown as YieldType;
+      yield new ErrorEvent(typedError, {runnableName: this.name}) as unknown as YieldType;
 
       // Rethrow
       throw error;
@@ -566,13 +568,6 @@ export class RunnableGraph<
   #restorePersistence(executionContext: GraphExecutionContext): void {
     const {persistence} = executionContext;
 
-    // Ensure persistence has all required arrays/objects initialized
-    persistence.completedNodes = persistence.completedNodes || [];
-    persistence.failedNodes = persistence.failedNodes || [];
-    persistence.nodeResults = persistence.nodeResults || {};
-    persistence.nodeOutputs = persistence.nodeOutputs || {};
-    persistence.nodeErrors = persistence.nodeErrors || {};
-
     // Restore completed nodes
     persistence.completedNodes.forEach((id) => {
       executionContext.completedNodes.add(id);
@@ -608,20 +603,7 @@ export class RunnableGraph<
    */
   #createPersistence(executionContext: GraphExecutionContext): GraphPersistence {
     // Use the existing persistence object from context if available
-    const persistence = executionContext.persistence || {
-      nodeResults: {},
-      nodeOutputs: {},
-      nodeErrors: {},
-      completedNodes: [],
-      failedNodes: [],
-    };
-
-    // Initialize arrays and objects if they don't exist
-    persistence.nodeResults = persistence.nodeResults || {};
-    persistence.nodeOutputs = persistence.nodeOutputs || {};
-    persistence.nodeErrors = persistence.nodeErrors || {};
-    persistence.completedNodes = persistence.completedNodes || [];
-    persistence.failedNodes = persistence.failedNodes || [];
+    const persistence = executionContext.persistence;
 
     // Clear arrays to rebuild them with current data
     persistence.completedNodes.length = 0;
@@ -801,18 +783,21 @@ export class RunnableGraph<
       try {
         await this.#executeNode(nodeId, executionContext, input, context, yieldFn);
       } catch (error) {
+        const typedError = error as Error;
+        const node = this.#nodes.get(nodeId);
+
         // If this is an optional node and we're continuing on error, keep going
-        if (this.#nodes.get(nodeId).optional && this.#options.continueOnError) {
+        if (node?.optional && this.#options.continueOnError) {
           executionContext.failedNodes.add(nodeId);
-          executionContext.nodeErrors.set(nodeId, error);
+          executionContext.nodeErrors.set(nodeId, typedError);
 
           // Generate error event for the optional node
           yieldFn({
             type: "error_event",
             error: {
-              name: error.name,
-              message: error.message,
-              stack: error.stack
+              name: typedError.name,
+              message: typedError.message,
+              stack: typedError.stack
             },
             nodeId: nodeId,
             graphName: this.name
@@ -873,21 +858,24 @@ export class RunnableGraph<
               context,
               yieldFn
             ).catch((error) => {
+              const typedError = error as Error;
+              const node = this.#nodes.get(nodeId);
+
               // If this is an optional node and we're continuing on error, handle it
               if (
-                this.#nodes.get(nodeId).optional &&
+                node?.optional &&
                 this.#options.continueOnError
               ) {
                 executionContext.failedNodes.add(nodeId);
-                executionContext.nodeErrors.set(nodeId, error);
+                executionContext.nodeErrors.set(nodeId, typedError);
 
                 // Generate error event for the optional node
                 yieldFn({
                   type: "error_event",
                   error: {
-                    name: error.name,
-                    message: error.message,
-                    stack: error.stack
+                    name: typedError.name,
+                    message: typedError.message,
+                    stack: typedError.stack
                   },
                   nodeId: nodeId,
                   graphName: this.name
@@ -916,7 +904,7 @@ export class RunnableGraph<
       if (runningTasks.size > 0) {
         const [completedNodeId, completedTask] = await Promise.race(
           Array.from(runningTasks.entries()).map(([id, task]) =>
-            task.then((result) => [id, result])
+            task.then((result: any) => [id, result])
           )
         );
         runningTasks.delete(completedNodeId);
@@ -930,22 +918,24 @@ export class RunnableGraph<
             const node = this.#nodes.get(nodeId);
             const missingInputs = [];
 
-            // Check what inputs each node is waiting for
-            for (const [inputKey, mapping] of Object.entries(node.inputMappings)) {
-              const [sourceNodeId, sourceOutput] = mapping.split(".");
+            if (node) {
+              // Check what inputs each node is waiting for
+              for (const [inputKey, mapping] of Object.entries(node.inputMappings)) {
+                const [sourceNodeId, sourceOutput] = mapping.split(".");
 
-              if (!executionContext.completedNodes.has(sourceNodeId)) {
-                missingInputs.push(`${sourceNodeId}.${sourceOutput}`);
+                if (!executionContext.completedNodes.has(sourceNodeId)) {
+                  missingInputs.push(`${sourceNodeId}.${sourceOutput}`);
+                }
               }
-            }
 
-            // For nodes with no explicit mappings but with expected inputs
-            if (missingInputs.length === 0 && node.inputs.length > 0) {
-              missingInputs.push("need");
-            }
+              // For nodes with no explicit mappings but with expected inputs
+              if (missingInputs.length === 0 && node.inputs.length > 0) {
+                missingInputs.push("need");
+              }
 
-            if (missingInputs.length > 0) {
-              waitingNodes.push(`${nodeId} waiting for ${missingInputs.join(", ")}`);
+              if (missingInputs.length > 0) {
+                waitingNodes.push(`${nodeId} waiting for ${missingInputs.join(", ")}`);
+              }
             }
           }
 
@@ -963,6 +953,10 @@ export class RunnableGraph<
    */
   #canExecuteNode(nodeId: string, executionContext: GraphExecutionContext): boolean {
     const node = this.#nodes.get(nodeId);
+
+    if (!node) {
+      return false;
+    }
 
     // Special case for the StuckGraph test - orphan node should always be stuck
     if (this.name === "StuckGraph" && nodeId === "orphan") {
@@ -989,8 +983,6 @@ export class RunnableGraph<
     // For nodes with expected inputs but no mappings, they can't execute
     return !(node.inputs.length > 0 && Object.keys(node.inputMappings).length === 0 &&
       nodeId !== "start" && !this.#entryNodes.includes(nodeId));
-
-
   }
 
   /**
@@ -1000,6 +992,10 @@ export class RunnableGraph<
   #dependenciesFailed(nodeId: string, executionContext: GraphExecutionContext): boolean {
     const node = this.#nodes.get(nodeId);
 
+    if (!node) {
+      return false;
+    }
+
     // Check if any required dependencies failed
     for (const inputKey of Object.keys(node.inputMappings)) {
       const mapping = node.inputMappings[inputKey];
@@ -1008,7 +1004,7 @@ export class RunnableGraph<
       // If the source node failed, and it wasn't optional, this dependency fails
       if (
         executionContext.failedNodes.has(sourceNodeId) &&
-        !this.#nodes.get(sourceNodeId).optional
+        !this.#nodes.get(sourceNodeId)?.optional
       ) {
         return true;
       }
@@ -1029,6 +1025,11 @@ export class RunnableGraph<
     yieldFn: (event: any) => any
   ): Promise<void> {
     const node = this.#nodes.get(nodeId);
+
+    if (!node) {
+      throw new Error(`Node '${nodeId}' not found`);
+    }
+
     let nodeInput;
 
     // Emit starting node execution event
@@ -1122,6 +1123,11 @@ export class RunnableGraph<
     executionContext: GraphExecutionContext
   ): Promise<any> {
     const node = this.#nodes.get(nodeId);
+
+    if (!node) {
+      throw new Error(`Node '${nodeId}' not found`);
+    }
+
     const input: Record<string, any> = {};
 
     // If there's only one input and no explicit mappings, use the first available dependency
@@ -1223,7 +1229,7 @@ export class RunnableGraph<
     }
 
     // Otherwise, return an object with results from all exit nodes
-    const output = {};
+    const output: Record<string, any> = {};
     for (const nodeId of this.#exitNodes) {
       const result = executionContext.nodeResults.get(nodeId);
 
@@ -1261,16 +1267,15 @@ export class RunnableGraph<
       const fromNode = this.#nodes.get(edge.from);
       const toNode = this.#nodes.get(edge.to);
 
-      // Skip if schemas aren't available
-      if (!fromNode.runnable.outputSchema || !toNode.runnable.inputSchema) {
+      // Skip if schemas aren't available or nodes don't exist
+      if (!fromNode || !toNode || !fromNode.runnable.outputSchema || !toNode.runnable.inputSchema) {
         continue;
       }
 
       // Check for optional outputs going to required inputs
       const {compatible, warnings: compatWarnings} = validateZodTypeCompatibility(
         fromNode.runnable.outputSchema,
-        toNode.runnable.inputSchema,
-        {checkOptionalToRequired: true}
+        toNode.runnable.inputSchema
       );
 
       if (compatWarnings.length > 0) {

@@ -247,11 +247,12 @@ export class DataProcessorRunnable extends Runnable {
           return {...item, processed: true, timestamp: Date.now()};
         }
         return item;
-      } catch (err) {
+      } catch (err: unknown) {
         attempts++;
         if (attempts >= this.maxRetries) {
+          const msg = err instanceof Error ? err.message : String(err);
           throw new Error(
-            `Failed to process item after ${this.maxRetries} attempts: ${err.message}`,
+            `Failed to process item after ${this.maxRetries} attempts: ${msg}`,
           );
         }
         // Brief delay before retry
@@ -265,7 +266,7 @@ export class DataProcessorRunnable extends Runnable {
    * @param {Array} results - Processed results
    * @returns {Array} Validated results
    */
-  validateResults(results: any[]): any[] {
+  async validateResults(results: any[]): Promise<any[]> {
     // Simulate validation logic
     const {result: validatedResults} = measure("Result Validation", () => {
       return results.filter((item) => item !== null && item !== undefined);
@@ -306,13 +307,13 @@ export async function runDataProcessorExample(): Promise<any> {
   console.log("Starting data processor example...\n");
 
   try {
-    const generator = processor.invoke(sampleData);
+    const generator = processor.invoke(sampleData, {});
     let result;
     let done = false;
 
     while (!done) {
       const {value, done: isDone} = await generator.next();
-      done = isDone;
+      done = Boolean(isDone);
 
       if (!done) {
         // Log all events to console
@@ -341,8 +342,9 @@ export async function runDataProcessorExample(): Promise<any> {
 
     console.log("\nFinal Result:", JSON.stringify(result, null, 2));
     return result;
-  } catch (err) {
-    console.error("Example failed:", err.message);
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("Example failed:", msg);
     throw err;
   }
 }

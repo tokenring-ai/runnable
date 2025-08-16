@@ -41,7 +41,7 @@ export class NumberProcessorRunnable extends Runnable {
       level: "info",
       message: `Processing number: ${input.value}`,
       timestamp: Date.now(),
-      runnableName: this.name,
+      runnableName: this.name ?? "Unnamed",
     };
 
     // Simulate processing
@@ -89,7 +89,7 @@ export class StringFormatterRunnable extends Runnable {
       level: "info",
       message: `Formatting result: ${input.result}`,
       timestamp: Date.now(),
-      runnableName: this.name,
+      runnableName: this.name ?? "Unnamed",
     };
 
     return {
@@ -157,8 +157,9 @@ export async function demonstrateCompatibleGraph(): Promise<void> {
 
     console.log("Graph executed successfully!");
     console.log("Events generated:", events.length);
-  } catch (error) {
-    console.error("Graph execution failed:", error.message);
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error("Graph execution failed:", msg);
   }
 }
 
@@ -182,9 +183,10 @@ export async function demonstrateIncompatibleGraph(): Promise<void> {
     // This should fail during validation
     const generator = graph.invoke({value: 42});
     console.log("ERROR: Graph should have failed validation!");
-  } catch (error) {
+  } catch (error: unknown) {
     console.log("✓ Graph validation correctly failed:");
-    console.log("  Error:", error.message);
+    const msg = error instanceof Error ? error.message : String(error);
+    console.log("  Error:", msg);
   }
 }
 
@@ -212,8 +214,9 @@ export async function demonstrateWarningScenarios(): Promise<void> {
       // Just consume events
     }
     console.log("✓ Graph executed with warnings about missing schemas");
-  } catch (error) {
-    console.error("Unexpected error:", error.message);
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error("Unexpected error:", msg);
   }
 
   // Scenario 2: Optional compatibility issues
@@ -265,8 +268,9 @@ export async function demonstrateWarningScenarios(): Promise<void> {
     console.log(
       "✓ Graph executed with warnings about optional/required mismatch",
     );
-  } catch (error) {
-    console.error("Unexpected error:", error.message);
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error("Unexpected error:", msg);
   }
 }
 

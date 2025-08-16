@@ -46,6 +46,9 @@ export class GreetingRunnable extends Runnable {
   > {
     // Validate input using the schema
     try {
+      if (!this.inputSchema) {
+        throw new Error("Input schema is not defined");
+      }
       const validatedInput = this.inputSchema.parse(input);
 
       yield {
@@ -53,7 +56,7 @@ export class GreetingRunnable extends Runnable {
         level: "info",
         message: `Processing greeting for ${validatedInput.name}`,
         timestamp: Date.now(),
-        runnableName: this.name,
+        runnableName: this.name ?? "Unnamed",
       };
 
       // Simulate some processing time
@@ -67,6 +70,9 @@ export class GreetingRunnable extends Runnable {
       };
 
       // Validate output using the schema
+      if (!this.outputSchema) {
+        throw new Error("Output schema is not defined");
+      }
       const validatedOutput = this.outputSchema.parse(result);
 
       yield {
@@ -74,17 +80,18 @@ export class GreetingRunnable extends Runnable {
         level: "info",
         message: "Greeting created successfully",
         timestamp: Date.now(),
-        runnableName: this.name,
+        runnableName: this.name ?? "Unnamed",
       };
 
       return validatedOutput;
-    } catch (error) {
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error);
       yield {
         type: "log",
         level: "error",
-        message: `Validation error: ${error.message}`,
+        message: `Validation error: ${msg}`,
         timestamp: Date.now(),
-        runnableName: this.name,
+        runnableName: this.name ?? "Unnamed",
       };
       throw error;
     }
@@ -109,7 +116,7 @@ export async function demonstrateSchemaRunnable(): Promise<void> {
   };
 
   try {
-    const generator = runnable.invoke(validInput);
+    const generator = runnable.invoke(validInput, {});
     const events: any[] = [];
     let result;
 
@@ -121,7 +128,7 @@ export async function demonstrateSchemaRunnable(): Promise<void> {
     // The generator's return value is available after iteration
     // In a real scenario, you'd need to handle this differently
     // For demo purposes, let's run it again to get the return value
-    const gen2 = runnable.invoke(validInput);
+    const gen2 = runnable.invoke(validInput, {});
     let next = await gen2.next();
     while (!next.done) {
       next = await gen2.next();
@@ -129,8 +136,9 @@ export async function demonstrateSchemaRunnable(): Promise<void> {
     result = next.value;
 
     console.log("Final Result:", result);
-  } catch (error) {
-    console.error("Error:", error.message);
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error("Error:", msg);
   }
 
   console.log("\n=== TESTING WITH INVALID INPUT ===");
@@ -141,12 +149,13 @@ export async function demonstrateSchemaRunnable(): Promise<void> {
   };
 
   try {
-    const generator = runnable.invoke(invalidInput);
+    const generator = runnable.invoke(invalidInput, {});
     for await (const event of generator) {
       console.log("Event:", event);
     }
-  } catch (error) {
-    console.error("Expected validation error:", error.message);
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error("Expected validation error:", msg);
   }
 }
 

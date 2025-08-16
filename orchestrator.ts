@@ -84,7 +84,7 @@ export class GraphOrchestrator extends Runnable {
       let done = false;
       while (!done) {
         const {value, done: isDone} = await gen.next();
-        done = isDone;
+        done = !!isDone;
         if (!done) {
           yield value;
         } else {
@@ -119,7 +119,7 @@ export class GraphOrchestratorBuilder {
   /**
    * The underlying graph being built
    */
-  private readonly #graph: RunnableGraph;
+  readonly #graph: RunnableGraph;
 
   /**
    * @param options - Graph options

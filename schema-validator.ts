@@ -71,8 +71,8 @@ function extractSchemaInfo(schema: z.ZodSchema): SchemaInfo {
     return {type: "unknown", optional: false, nullable: false};
   }
 
-  const def = schema._def;
-  const typeName = def.typeName;
+  const def: any = (schema as any)._def;
+  const typeName: string = def.typeName;
 
   // Handle optional schemas
   if (typeName === "ZodOptional") {
@@ -110,13 +110,13 @@ function extractSchemaInfo(schema: z.ZodSchema): SchemaInfo {
         type: "array",
         optional: false,
         nullable: false,
-        element: extractSchemaInfo(def.type),
+        element: extractSchemaInfo(def.type as z.ZodSchema),
       };
 
     case "ZodObject":
       const properties: Record<string, SchemaInfo> = {};
-      for (const [key, value] of Object.entries(def.shape())) {
-        properties[key] = extractSchemaInfo(value);
+      for (const [key, value] of Object.entries((def as any).shape())) {
+        properties[key] = extractSchemaInfo(value as z.ZodSchema);
       }
       return {
         type: "object",
@@ -130,7 +130,7 @@ function extractSchemaInfo(schema: z.ZodSchema): SchemaInfo {
         type: "union",
         optional: false,
         nullable: false,
-        union: def.options.map(extractSchemaInfo),
+        union: (def.options as z.ZodSchema[]).map(extractSchemaInfo),
       };
 
     case "ZodEnum":
@@ -138,7 +138,7 @@ function extractSchemaInfo(schema: z.ZodSchema): SchemaInfo {
         type: "enum",
         optional: false,
         nullable: false,
-        enum: def.values,
+        enum: (def.values as any[]),
       };
 
     case "ZodLiteral":
@@ -146,7 +146,7 @@ function extractSchemaInfo(schema: z.ZodSchema): SchemaInfo {
         type: "literal",
         optional: false,
         nullable: false,
-        literal: def.value,
+        literal: (def.value as any),
       };
 
     case "ZodAny":
@@ -349,9 +349,9 @@ function validateEnumCompatibility(
   }
 
   // Check if there are any common values between the enums
-  const commonValues = outputSchema.enum.filter(value =>
-    inputSchema.enum.includes(value)
-  );
+  const outputEnum = outputSchema.enum ?? [];
+  const inputEnum = inputSchema.enum ?? [];
+  const commonValues = outputEnum.filter((value) => inputEnum.includes(value));
 
   if (commonValues.length === 0) {
     result.errors.push(
@@ -363,14 +363,10 @@ function validateEnumCompatibility(
 
   // For partially overlapping enum types, we consider them compatible but issue a warning
   // Check if there are values in input not found in output
-  const missingValues = inputSchema.enum.filter(value =>
-    !outputSchema.enum.includes(value)
-  );
+  const missingValues = inputEnum.filter((value) => !outputEnum.includes(value));
 
   // Check if there are extra values in output not found in input
-  const extraValues = outputSchema.enum.filter(value =>
-    !inputSchema.enum.includes(value)
-  );
+  const extraValues = outputEnum.filter((value) => !inputEnum.includes(value));
 
   // If we have common values but some values differ
   if ((missingValues.length > 0 || extraValues.length > 0) && commonValues.length > 0) {
@@ -542,7 +538,7 @@ function validateSchemaCompatibility(
     } else {
       // Output is union, input is simple type
       let hasCompatible = false;
-      for (const outputOption of outputSchema.union) {
+      for (const outputOption of (outputSchema.union ?? [])) {
         const optionResult = validateSchemaCompatibility(outputOption, inputSchema);
         if (optionResult.compatible) {
           hasCompatible = true;
@@ -686,8 +682,9 @@ export function validateSchemaExists(
       );
     }
   } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
     result.warnings.push(
-      `Could not analyze schema for ${context}: ${error.message}`,
+      `Could not analyze schema for ${context}: ${msg}`,
     );
   }
 
