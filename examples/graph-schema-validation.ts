@@ -1,10 +1,8 @@
 /**
- * @file examples/graph-schema-validation.ts
- * @description Example demonstrating schema validation in RunnableGraph
  */
 
 import {z} from "zod";
-import {Runnable, RunnableGraph} from "../index.js";
+import {BaseYieldType, Runnable, RunnableGraph} from "../index.js";
 
 // Create test runnables with different schemas
 export class NumberProcessorRunnable extends Runnable {
@@ -22,14 +20,10 @@ export class NumberProcessorRunnable extends Runnable {
     });
   }
 
-  async* invoke(input: any): AsyncGenerator<
-    {
-      type: string;
-      level: string;
-      message: string;
-      timestamp: number;
-      runnableName: string;
-    },
+  async* invoke(
+    input: { value: number },
+  ): AsyncGenerator<
+    BaseYieldType,
     {
       result: string;
       processed: boolean;
@@ -70,14 +64,10 @@ export class StringFormatterRunnable extends Runnable {
     });
   }
 
-  async* invoke(input: any): AsyncGenerator<
-    {
-      type: string;
-      level: string;
-      message: string;
-      timestamp: number;
-      runnableName: string;
-    },
+  async* invoke(
+    input: { result: string; processed: boolean },
+  ): AsyncGenerator<
+    BaseYieldType,
     {
       message: string;
       timestamp: number;
@@ -115,7 +105,9 @@ export class IncompatibleRunnable extends Runnable {
     });
   }
 
-  async* invoke(input: any): AsyncGenerator<
+  async* invoke(
+    input: { data: number; flag: string },
+  ): AsyncGenerator<
     never,
     {
       output: string;
@@ -147,12 +139,12 @@ export async function demonstrateCompatibleGraph(): Promise<void> {
   try {
     // Execute the graph
     const generator = graph.invoke({value: 42});
-    const events: any[] = [];
+    const events: BaseYieldType[] = [];
     let result;
 
     for await (const event of generator) {
       events.push(event);
-      console.log("Event:", event.type, event.message || event.data);
+      console.log("Event:", event.type, (event as any).message || (event as any).data);
     }
 
     console.log("Graph executed successfully!");
@@ -198,7 +190,7 @@ export async function demonstrateWarningScenarios(): Promise<void> {
   const graphWithoutSchemas = new RunnableGraph({name: "NoSchemaGraph"});
 
   const noSchemaRunnable = new (class extends Runnable {
-    async* invoke(input: any) {
+    async* invoke(input: unknown) {
       return input;
     }
   })();
@@ -232,7 +224,7 @@ export async function demonstrateWarningScenarios(): Promise<void> {
       });
     }
 
-    async* invoke(input: any) {
+    async* invoke(input: { value: number }) {
       return {result: `Value: ${input.value}`};
     }
   })();
@@ -248,7 +240,7 @@ export async function demonstrateWarningScenarios(): Promise<void> {
       });
     }
 
-    async* invoke(input: any) {
+    async* invoke(input: { result: string }) {
       return {final: input.result};
     }
   })();

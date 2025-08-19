@@ -1,6 +1,8 @@
 # RunnableGraph - Graph-Based Runnable Orchestration
 
-The `RunnableGraph` class extends the core `Runnable` interface to support complex orchestration of multiple interconnected runnables. It enables the creation of sophisticated data processing pipelines with support for parallel execution, conditional flows, and error handling.
+The `RunnableGraph` class extends the core `Runnable` interface to support complex orchestration of multiple
+interconnected runnables. It enables the creation of sophisticated data processing pipelines with support for parallel
+execution, conditional flows, and error handling.
 
 ## Key Features
 
@@ -19,48 +21,48 @@ The `RunnableGraph` class extends the core `Runnable` interface to support compl
 ### Simple Linear Pipeline
 
 ```javascript
-import { RunnableGraph, Runnable } from '@token-ring/runnable';
+import {RunnableGraph, Runnable} from '@token-ring/runnable';
 
 // Create individual runnables
 class ValidatorRunnable extends Runnable {
-    async *invoke(input, context) {
-        yield { type: 'log', level: 'info', message: 'Validating input', timestamp: Date.now(), runnableName: this.name };
-        
-        if (!input.email) {
-            throw new Error('Email is required');
-        }
-        
-        return { ...input, validated: true };
-    }
+ async* invoke(input, context) {
+  yield {type: 'log', level: 'info', message: 'Validating input', timestamp: Date.now(), runnableName: this.name};
+
+  if (!input.email) {
+   throw new Error('Email is required');
+  }
+
+  return {...input, validated: true};
+ }
 }
 
 class TransformerRunnable extends Runnable {
-    async *invoke(input, context) {
-        yield { type: 'log', level: 'info', message: 'Transforming data', timestamp: Date.now(), runnableName: this.name };
-        
-        return {
-            ...input,
-            email: input.email.toLowerCase(),
-            processedAt: new Date().toISOString()
-        };
-    }
+ async* invoke(input, context) {
+  yield {type: 'log', level: 'info', message: 'Transforming data', timestamp: Date.now(), runnableName: this.name};
+
+  return {
+   ...input,
+   email: input.email.toLowerCase(),
+   processedAt: new Date().toISOString()
+  };
+ }
 }
 
 // Build the graph
-const pipeline = RunnableGraph.builder({ name: 'UserPipeline' })
-    .node('validator', new ValidatorRunnable({ name: 'Validator' }))
-    .node('transformer', new TransformerRunnable({ name: 'Transformer' }))
-    .connect('validator', 'transformer')
-    .entry('validator')
-    .exit('transformer')
-    .build();
+const pipeline = RunnableGraph.builder({name: 'UserPipeline'})
+.node('validator', new ValidatorRunnable({name: 'Validator'}))
+.node('transformer', new TransformerRunnable({name: 'Transformer'}))
+.connect('validator', 'transformer')
+.entry('validator')
+.exit('transformer')
+.build();
 
 // Execute the pipeline
-const input = { name: 'John', email: 'JOHN@EXAMPLE.COM' };
+const input = {name: 'John', email: 'JOHN@EXAMPLE.COM'};
 const generator = pipeline.invoke(input);
 
 for await (const event of generator) {
-    console.log(event);
+ console.log(event);
 }
 
 const result = await generator.next();
@@ -93,34 +95,34 @@ Nodes can accept multiple inputs from different sources:
 
 ```javascript
 class AggregatorRunnable extends Runnable {
-    async *invoke(input, context) {
-        // input will be an object with keys matching the configured inputs
-        // e.g., { userInfo: {...}, orderInfo: {...}, paymentInfo: {...} }
-        
-        const aggregated = {
-            userId: input.userInfo.id,
-            orderId: input.orderInfo.id,
-            paymentStatus: input.paymentInfo.status,
-            aggregatedAt: new Date().toISOString()
-        };
-        
-        return aggregated;
-    }
+ async* invoke(input, context) {
+  // input will be an object with keys matching the configured inputs
+  // e.g., { userInfo: {...}, orderInfo: {...}, paymentInfo: {...} }
+
+  const aggregated = {
+   userId: input.userInfo.id,
+   orderId: input.orderInfo.id,
+   paymentStatus: input.paymentInfo.status,
+   aggregatedAt: new Date().toISOString()
+  };
+
+  return aggregated;
+ }
 }
 
 const graph = RunnableGraph.builder()
-    .node('userService', new UserServiceRunnable())
-    .node('orderService', new OrderServiceRunnable())
-    .node('paymentService', new PaymentServiceRunnable())
-    .node('aggregator', new AggregatorRunnable(), { 
-        inputs: ['userInfo', 'orderInfo', 'paymentInfo'] 
-    })
-    .connect('userService', 'aggregator', { toInput: 'userInfo' })
-    .connect('orderService', 'aggregator', { toInput: 'orderInfo' })
-    .connect('paymentService', 'aggregator', { toInput: 'paymentInfo' })
-    .entry('userService', 'orderService', 'paymentService')
-    .exit('aggregator')
-    .build();
+.node('userService', new UserServiceRunnable())
+.node('orderService', new OrderServiceRunnable())
+.node('paymentService', new PaymentServiceRunnable())
+.node('aggregator', new AggregatorRunnable(), {
+ inputs: ['userInfo', 'orderInfo', 'paymentInfo']
+})
+.connect('userService', 'aggregator', {toInput: 'userInfo'})
+.connect('orderService', 'aggregator', {toInput: 'orderInfo'})
+.connect('paymentService', 'aggregator', {toInput: 'paymentInfo'})
+.entry('userService', 'orderService', 'paymentService')
+.exit('aggregator')
+.build();
 ```
 
 ### Multi-Output Nodes
@@ -129,28 +131,28 @@ Nodes can produce multiple outputs for different downstream consumers:
 
 ```javascript
 class SplitterRunnable extends Runnable {
-    async *invoke(input, context) {
-        return {
-            personalData: { name: input.name, age: input.age },
-            contactData: { email: input.email, phone: input.phone },
-            metadata: { processedAt: Date.now(), version: '1.0' }
-        };
-    }
+ async* invoke(input, context) {
+  return {
+   personalData: {name: input.name, age: input.age},
+   contactData: {email: input.email, phone: input.phone},
+   metadata: {processedAt: Date.now(), version: '1.0'}
+  };
+ }
 }
 
 const graph = RunnableGraph.builder()
-    .node('splitter', new SplitterRunnable(), { 
-        outputs: ['personalData', 'contactData', 'metadata'] 
-    })
-    .node('personalProcessor', new PersonalProcessorRunnable())
-    .node('contactProcessor', new ContactProcessorRunnable())
-    .node('metadataProcessor', new MetadataProcessorRunnable())
-    .connect('splitter', 'personalProcessor', { fromOutput: 'personalData' })
-    .connect('splitter', 'contactProcessor', { fromOutput: 'contactData' })
-    .connect('splitter', 'metadataProcessor', { fromOutput: 'metadata' })
-    .entry('splitter')
-    .exit('personalProcessor', 'contactProcessor', 'metadataProcessor')
-    .build();
+.node('splitter', new SplitterRunnable(), {
+ outputs: ['personalData', 'contactData', 'metadata']
+})
+.node('personalProcessor', new PersonalProcessorRunnable())
+.node('contactProcessor', new ContactProcessorRunnable())
+.node('metadataProcessor', new MetadataProcessorRunnable())
+.connect('splitter', 'personalProcessor', {fromOutput: 'personalData'})
+.connect('splitter', 'contactProcessor', {fromOutput: 'contactData'})
+.connect('splitter', 'metadataProcessor', {fromOutput: 'metadata'})
+.entry('splitter')
+.exit('personalProcessor', 'contactProcessor', 'metadataProcessor')
+.build();
 ```
 
 ### Error Handling and Optional Nodes
@@ -178,77 +180,80 @@ const pipeline = RunnableGraph.builder({
 ### Parallel Execution Control
 
 ```javascript
-const pipeline = RunnableGraph.builder({ 
-    name: 'ParallelPipeline',
-    parallel: true,           // Enable parallel execution
-    maxConcurrency: 3,        // Limit concurrent nodes
-    continueOnError: false    // Stop on first error
+const pipeline = RunnableGraph.builder({
+ name: 'ParallelPipeline',
+ parallel: true,           // Enable parallel execution
+ maxConcurrency: 3,        // Limit concurrent nodes
+ continueOnError: false    // Stop on first error
 })
-    // ... node definitions
-    .build();
+// ... node definitions
+.build();
 ```
 
 ## Schema Validation
 
-RunnableGraph provides comprehensive schema validation using Zod schemas to ensure type safety and data compatibility between connected nodes. **Schema validation occurs during graph construction**, not during execution, allowing you to catch compatibility issues early.
+RunnableGraph provides comprehensive schema validation using Zod schemas to ensure type safety and data compatibility
+between connected nodes. **Schema validation occurs during graph construction**, not during execution, allowing you to
+catch compatibility issues early.
 
 ### Validation Timing
 
 Schema validation happens when you:
+
 - **Connect nodes** (`graph.connect()`) - Validates output→input compatibility
 - **Set entry nodes** (`graph.setEntryNodes()`) - Validates all connections
 - **Set exit nodes** (`graph.setExitNodes()`) - Validates all connections
 
 ```javascript
-import { z } from 'zod';
-import { Runnable, RunnableGraph } from '@token-ring/runnable';
+import {z} from 'zod';
+import {Runnable, RunnableGraph} from '@token-ring/runnable';
 
 // Define runnables with schemas
 class DataProcessor extends Runnable {
-    constructor() {
-        super({
-            name: 'DataProcessor',
-            inputSchema: z.object({
-                userId: z.string(),
-                email: z.string().email()
-            }),
-            outputSchema: z.object({
-                userId: z.string(),
-                email: z.string(),
-                processed: z.boolean()
-            })
-        });
-    }
-    
-    async *invoke(input) {
-        return {
-            ...input,
-            processed: true
-        };
-    }
+ constructor() {
+  super({
+   name: 'DataProcessor',
+   inputSchema: z.object({
+    userId: z.string(),
+    email: z.string().email()
+   }),
+   outputSchema: z.object({
+    userId: z.string(),
+    email: z.string(),
+    processed: z.boolean()
+   })
+  });
+ }
+
+ async* invoke(input) {
+  return {
+   ...input,
+   processed: true
+  };
+ }
 }
 
 class EmailValidator extends Runnable {
-    constructor() {
-        super({
-            name: 'EmailValidator',
-            inputSchema: z.object({
-                email: z.string(),
-                processed: z.boolean()
-            }),
-            outputSchema: z.object({
-                email: z.string(),
-                valid: z.boolean()
-            })
-        });
-    }
-    
-    async *invoke(input) {
-        return {
-            email: input.email,
-            valid: input.email.includes('@')
-        };
-    }
+ constructor() {
+  super({
+   name: 'EmailValidator',
+   inputSchema: z.object({
+    email: z.string(),
+    processed: z.boolean()
+   }),
+   outputSchema: z.object({
+    email: z.string(),
+    valid: z.boolean()
+   })
+  });
+ }
+
+ async* invoke(input) {
+  return {
+   email: input.email,
+   valid: input.email.includes('@')
+  };
+ }
 }
 
 // Schema validation happens during graph construction
@@ -258,9 +263,9 @@ graph.addNode('validator', new EmailValidator());
 
 // This will throw an error immediately if schemas are incompatible
 try {
-    graph.connect('processor', 'validator'); // ✅ Compatible - both have email field
+ graph.connect('processor', 'validator'); // ✅ Compatible - both have email field
 } catch (error) {
-    console.error('Schema validation failed:', error.message);
+ console.error('Schema validation failed:', error.message);
 }
 ```
 
@@ -271,30 +276,35 @@ try {
 These schema incompatibilities will **throw errors** during graph construction:
 
 1. **Incompatible basic types**
+
 ```javascript
 // Output: { result: boolean }, Input: { result: number }
 // Error: "Incompatible types: boolean cannot be used as number"
 ```
 
 2. **Missing required properties**
+
 ```javascript
 // Output: { name: string }, Input: { name: string, age: number }
 // Error: "Required input property 'age' is not provided by output schema"
 ```
 
 3. **Nullable to non-nullable mismatch**
+
 ```javascript
 // Output: { result: string | null }, Input: { result: string }
 // Error: "Output can be null but input does not accept null values"
 ```
 
 4. **Nested object incompatibilities**
+
 ```javascript
 // Output: { user: { age: string } }, Input: { user: { age: number } }
 // Error: "Property 'user': Property 'age': Incompatible types: string cannot be used as number"
 ```
 
 5. **Array element type mismatches**
+
 ```javascript
 // Output: { items: boolean[] }, Input: { items: number[] }
 // Error: "Property 'items': Array element: Incompatible types: boolean cannot be used as number"
@@ -305,18 +315,21 @@ These schema incompatibilities will **throw errors** during graph construction:
 These potential issues will **log warnings** but won't prevent graph construction:
 
 1. **Optional property mismatches**
+
 ```javascript
 // Output: { name: string, age?: number }, Input: { name: string, age: string }
 // Warning: "Property 'age': Optional output type may not match required input type"
 ```
 
-2. **Multi-output node limitations**
+6. **Multi-output node limitations**
+
 ```javascript
 // Node with multiple outputs using specific output keys
 // Warning: "Cannot validate specific output 'branch1' from multi-output node - using full output schema"
 ```
 
-3. **Union type compatibility**
+7. **Union type compatibility**
+
 ```javascript
 // Output: { result: string | number }, Input: { result: string }
 // Warning: "Union output type has compatible option for input"
@@ -328,33 +341,33 @@ When a node has multiple outputs (configured with `{ outputs: ['out1', 'out2'] }
 
 ```javascript
 class SplitterRunnable extends Runnable {
-    constructor() {
-        super({
-            name: 'Splitter',
-            inputSchema: z.object({ data: z.string() }),
-            outputSchema: z.object({
-                branch1: z.string(),
-                branch2: z.number()
-            })
-        });
-    }
-    
-    async *invoke(input) {
-        return {
-            branch1: input.data,
-            branch2: input.data.length
-        };
-    }
+ constructor() {
+  super({
+   name: 'Splitter',
+   inputSchema: z.object({data: z.string()}),
+   outputSchema: z.object({
+    branch1: z.string(),
+    branch2: z.number()
+   })
+  });
+ }
+
+ async* invoke(input) {
+  return {
+   branch1: input.data,
+   branch2: input.data.length
+  };
+ }
 }
 
 const graph = new RunnableGraph();
-graph.addNode('splitter', new SplitterRunnable(), { 
-    outputs: ['branch1', 'branch2'] 
+graph.addNode('splitter', new SplitterRunnable(), {
+ outputs: ['branch1', 'branch2']
 });
 graph.addNode('processor', new StringProcessor());
 
 // This will only generate a warning, not an error
-graph.connect('splitter', 'processor', { fromOutput: 'branch1' });
+graph.connect('splitter', 'processor', {fromOutput: 'branch1'});
 // Warning: "Cannot validate specific output 'branch1' from multi-output node"
 ```
 
@@ -364,10 +377,10 @@ Nodes without schemas will generate warnings but won't block validation:
 
 ```javascript
 class LegacyRunnable extends Runnable {
-    // No inputSchema or outputSchema defined
-    async *invoke(input) {
-        return { processed: input };
-    }
+ // No inputSchema or outputSchema defined
+ async* invoke(input) {
+  return {processed: input};
+ }
 }
 
 const graph = new RunnableGraph();
@@ -387,14 +400,14 @@ graph.addNode('legacy', new LegacyRunnable());
 ```javascript
 // ✅ Good: Specific, well-defined schemas
 const inputSchema = z.object({
-    userId: z.string().uuid(),
-    email: z.string().email(),
-    age: z.number().min(0).max(150)
+ userId: z.string().uuid(),
+ email: z.string().email(),
+ age: z.number().min(0).max(150)
 });
 
 // ❌ Avoid: Overly permissive schemas
 const inputSchema = z.object({
-    data: z.any()
+ data: z.any()
 });
 ```
 
@@ -465,32 +478,62 @@ The graph also emits its own events:
 ```javascript
 // Graph execution start
 {
-    type: 'log',
-    level: 'info',
-    message: 'Starting graph execution: MyPipeline',
-    timestamp: 1234567890,
-    runnableName: 'MyPipeline'
+ type: 'log',
+  level
+:
+ 'info',
+  message
+:
+ 'Starting graph execution: MyPipeline',
+  timestamp
+:
+ 1234567890,
+  runnableName
+:
+ 'MyPipeline'
 }
 
 // Node execution start
 {
-    type: 'log',
-    level: 'info',
-    message: "Starting execution of node 'processor1'",
-    timestamp: 1234567890,
-    runnableName: 'MyPipeline',
-    nodeId: 'processor1'
+ type: 'log',
+  level
+:
+ 'info',
+  message
+:
+ "Starting execution of node 'processor1'",
+  timestamp
+:
+ 1234567890,
+  runnableName
+:
+ 'MyPipeline',
+  nodeId
+:
+ 'processor1'
 }
 
 // Graph execution completion
 {
-    type: 'log',
-    level: 'info',
-    message: 'Graph execution completed: MyPipeline',
-    timestamp: 1234567890,
-    runnableName: 'MyPipeline',
-    completedNodes: ['node1', 'node2', 'node3'],
-    failedNodes: []
+ type: 'log',
+  level
+:
+ 'info',
+  message
+:
+ 'Graph execution completed: MyPipeline',
+  timestamp
+:
+ 1234567890,
+  runnableName
+:
+ 'MyPipeline',
+  completedNodes
+:
+ ['node1', 'node2', 'node3'],
+  failedNodes
+:
+ []
 }
 ```
 
@@ -501,21 +544,21 @@ The graph also emits its own events:
 ```javascript
 // Create testable runnables with clear interfaces
 class TestableRunnable extends Runnable {
-    constructor(name, dependencies = {}) {
-        super({ name });
-        this.dependencies = dependencies;
-    }
-    
-    async *invoke(input, context) {
-        // Use injected dependencies for external calls
-        const result = await this.dependencies.externalService.process(input);
-        return result;
-    }
+ constructor(name, dependencies = {}) {
+  super({name});
+  this.dependencies = dependencies;
+ }
+
+ async* invoke(input, context) {
+  // Use injected dependencies for external calls
+  const result = await this.dependencies.externalService.process(input);
+  return result;
+ }
 }
 
 // In tests, inject mocks
-const mockService = { process: vi.fn().mockResolvedValue('mocked') };
-const runnable = new TestableRunnable('test', { externalService: mockService });
+const mockService = {process: vi.fn().mockResolvedValue('mocked')};
+const runnable = new TestableRunnable('test', {externalService: mockService});
 ```
 
 ### 2. Handle Errors Gracefully
@@ -618,12 +661,14 @@ Key testing patterns:
 See the examples directory for complete working examples:
 
 ### Graph Examples (`examples/graph-examples.js`)
+
 - Simple linear pipeline
 - Fan-out/fan-in pattern
 - Conditional processing with error handling
 - Real-world data processing pipeline
 
 ### Schema Validation Examples (`examples/graph-schema-validation.js`)
+
 - Schema-based type checking
 - Error handling during graph construction
 - Multi-output node validation
@@ -642,9 +687,11 @@ node examples/graph-schema-validation.js
 ### RunnableGraph
 
 #### Constructor
+
 - `new RunnableGraph(options?: RunnableGraphOptions)`
 
 #### Methods
+
 - `addNode(id: string, runnable: Runnable, config?: NodeConfig): RunnableGraph`
 - `connect(fromNodeId: string, toNodeId: string, config?: ConnectionConfig): RunnableGraph`
 - `setEntryNodes(...nodeIds: string[]): RunnableGraph`
@@ -652,11 +699,13 @@ node examples/graph-schema-validation.js
 - `invoke(input: any, context?: any): AsyncGenerator`
 
 #### Static Methods
+
 - `RunnableGraph.builder(options?: RunnableGraphOptions): RunnableGraphBuilder`
 
 ### RunnableGraphBuilder
 
 #### Methods
+
 - `node(id: string, runnable: Runnable, config?: NodeConfig): RunnableGraphBuilder`
 - `connect(from: string, to: string, config?: ConnectionConfig): RunnableGraphBuilder`
 - `entry(...nodeIds: string[]): RunnableGraphBuilder`
@@ -691,4 +740,5 @@ for await (const event of generator) {
 const result = await generator.next();
 ```
 
-The graph approach provides better error handling, event visibility, and the ability to easily modify the pipeline structure.
+The graph approach provides better error handling, event visibility, and the ability to easily modify the pipeline
+structure.

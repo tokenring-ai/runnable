@@ -39,11 +39,13 @@ describe("Reusable pattern runnables", () => {
 				return "A";
 			}
 		}
+
 		class B extends Runnable {
 			async *invoke() {
 				return "B";
 			}
 		}
+
 		const cond = new ConditionalRunnable((i) => i === "a", new A(), new B());
 		let result = await collect(cond.invoke("a"));
 		expect(result.returnValue).toBe("A");
@@ -57,11 +59,13 @@ describe("Reusable pattern runnables", () => {
 				return i + 1;
 			}
 		}
+
 		class TimesTwo extends Runnable {
 			async *invoke(i) {
 				return i * 2;
 			}
 		}
+
 		const join = new ParallelJoinRunnable([new PlusOne(), new TimesTwo()]);
 		const { returnValue } = await collect(join.invoke(3));
 		expect(returnValue).toEqual([4, 6]);

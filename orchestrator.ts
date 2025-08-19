@@ -19,8 +19,6 @@ export class GraphOrchestrator extends Runnable {
   persistence: Record<string, any>;
 
   /**
-   * @param graph - The graph to orchestrate
-   * @param options - Options for the runnable
    */
   constructor(
     graph: RunnableGraph = new RunnableGraph(),
@@ -34,8 +32,6 @@ export class GraphOrchestrator extends Runnable {
   /**
    * Returns a builder for fluently creating an orchestrator with an
    * initial graph definition.
-   * @param options - Graph options
-   * @returns A builder instance
    */
   static builder(options?: RunnableGraphOptions): GraphOrchestratorBuilder {
     return new GraphOrchestratorBuilder(options);
@@ -45,8 +41,6 @@ export class GraphOrchestrator extends Runnable {
    * Hook that allows subclasses to modify the graph between runs.
    * Return `true` if the graph was changed and should be executed again.
    *
-   * @param params - Parameters for updating the graph
-   * @returns Whether the graph was changed and should be run again
    */
   async updateGraph({
                       graph,
@@ -66,9 +60,6 @@ export class GraphOrchestrator extends Runnable {
 
   /**
    * Runs the orchestrator until `updateGraph` returns false.
-   * @param input - Input for the orchestrator
-   * @param context - Context for execution
-   * @returns Generator yielding events during execution
    */
   async* invoke(
     input: any,
@@ -122,7 +113,6 @@ export class GraphOrchestratorBuilder {
   readonly #graph: RunnableGraph;
 
   /**
-   * @param options - Graph options
    */
   constructor(options?: RunnableGraphOptions) {
     this.#graph = new RunnableGraph(options);
@@ -130,10 +120,6 @@ export class GraphOrchestratorBuilder {
 
   /**
    * Adds a node to the graph.
-   * @param id - Node ID
-   * @param runnable - Runnable instance
-   * @param config - Node configuration
-   * @returns This builder for chaining
    */
   node(
     id: string,
@@ -146,10 +132,6 @@ export class GraphOrchestratorBuilder {
 
   /**
    * Connects two nodes in the graph.
-   * @param from - Source node ID
-   * @param to - Target node ID
-   * @param config - Connection configuration
-   * @returns This builder for chaining
    */
   connect(
     from: string,
@@ -162,8 +144,6 @@ export class GraphOrchestratorBuilder {
 
   /**
    * Sets entry nodes.
-   * @param nodeIds - Entry node IDs
-   * @returns This builder for chaining
    */
   entry(...nodeIds: string[]): GraphOrchestratorBuilder {
     this.#graph.setEntryNodes(...nodeIds);
@@ -172,8 +152,6 @@ export class GraphOrchestratorBuilder {
 
   /**
    * Sets exit nodes.
-   * @param nodeIds - Exit node IDs
-   * @returns This builder for chaining
    */
   exit(...nodeIds: string[]): GraphOrchestratorBuilder {
     this.#graph.setExitNodes(...nodeIds);
@@ -182,7 +160,6 @@ export class GraphOrchestratorBuilder {
 
   /**
    * Finalizes the builder and returns a GraphOrchestrator.
-   * @returns The constructed orchestrator
    */
   build(): GraphOrchestrator {
     return new GraphOrchestrator(this.#graph);

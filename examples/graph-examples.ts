@@ -1,6 +1,4 @@
 /**
- * @file core/runnable/examples/graph-examples.ts
- * @description Practical examples demonstrating RunnableGraph usage patterns.
  */
 
 import {RunnableGraph} from "../graph.js";

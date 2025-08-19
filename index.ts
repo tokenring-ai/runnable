@@ -1,6 +1,4 @@
 /**
- * @file core/runnable/index.ts
- * @description Entry point for the @token-ring/runnable package.
  * Exports the core Runnable class and related types.
  */
 

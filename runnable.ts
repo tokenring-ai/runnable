@@ -1,6 +1,4 @@
 /**
- * @file core/runnable/runnable.ts
- * @description Defines the core Runnable class/interface.
  */
 
 import {z} from "zod";
@@ -44,11 +42,7 @@ export type RunnableOptions = {
  * Represents an operation that can be executed, yielding intermediate events/chunks
  * and ultimately returning a final output. This is the foundational building block for tasks.
  *
- * @template InputType - The type of the input data for the `invoke` method.
- * @template OutputType - The type of the final result returned by the `invoke` generator.
- * @template YieldType - The type of events or data chunks yielded by the `invoke` generator during execution.
  *                       This would typically be a union of event types like those defined in `events.js`.
- * @template ContextType - The type of the optional context object passed to `invoke`.
  */
 export class Runnable<InputType = any, OutputType = any, YieldType = any, ContextType = any> {
   /**
@@ -89,7 +83,6 @@ export class Runnable<InputType = any, OutputType = any, YieldType = any, Contex
 
   /**
    * Creates an instance of a Runnable.
-   * @param options - Configuration options for the Runnable.
    */
   constructor(options: RunnableOptions = {}) {
     this.name = options.name;
@@ -111,7 +104,6 @@ export class Runnable<InputType = any, OutputType = any, YieldType = any, Contex
 
   /**
    * Returns a formatted help message showing the runnable's configuration.
-   * @returns A pretty-formatted help message with name, description, and schema information.
    */
   help(): string {
     const lines = [];
@@ -171,13 +163,9 @@ export class Runnable<InputType = any, OutputType = any, YieldType = any, Contex
    * It is an asynchronous generator that yields `YieldType` events/chunks during its
    * execution and finally returns an `OutputType`.
    *
-   * @param input - The input data for the runnable.
-   * @param context - Optional context providing additional data or services for execution.
-   * @returns An async generator.
    *          - `YieldType`: The type of values `yield`ed during execution (e.g., log events, data chunks).
    *          - `OutputType`: The type of the value `return`ed by the generator upon completion.
    *          - `void`: The type of value passed into `next(value)` by the consumer (typically not used, so `void`).
-   * @example
    * // class MyRunnable extends Runnable<string, string, import('./events.js').LogEvent, any> {
    * //   constructor(name = 'MyTask') {
    * //     super({ name });
@@ -234,9 +222,6 @@ export class Runnable<InputType = any, OutputType = any, YieldType = any, Contex
    * Convenience helper that executes {@link invoke} and returns only the final
    * result. Any yielded events are consumed and discarded.
    *
-   * @param input - The input data for the runnable.
-   * @param context - Optional context providing additional data or services for execution.
-   * @returns The final output value
    */
   async run(input: InputType, context?: ContextType): Promise<OutputType> {
     const iterator = this.invoke(input, context)[Symbol.asyncIterator]();
@@ -249,9 +234,6 @@ export class Runnable<InputType = any, OutputType = any, YieldType = any, Contex
 
   /**
    * Helper method to format Zod schema information for display.
-   * @private
-   * @param schema - The Zod schema to format.
-   * @returns A formatted description of the schema.
    */
   private _formatZodSchema(schema: z.ZodSchema): string {
     if (!schema) return "undefined";

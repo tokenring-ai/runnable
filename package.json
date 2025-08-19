@@ -1,26 +1,25 @@
 {
-	"name": "@token-ring/runnable",
-	"version": "0.1.0",
-	"description": "Core Runnable interface and base types for creating executable, streamable operations.",
-	"main": "index.ts",
-	"types": "./index.d.ts",
-	"type": "module",
-	"license": "MIT",
-	"exports": {
-		".": "./index.ts",
-		"./*": "./*.ts"
-	},
-	"scripts": {
-		"test": "vitest run",
-		"test:watch": "vitest"
-	},
-	"dependencies": {
-		"eventemitter3": "^5.0.1",
-		"zod": "^4.0.17"
-	},
-	"devDependencies": {
-
-		"typescript": "^5.9.2",
-		"vitest": "^3.2.4"
-	}
+ "name": "@token-ring/runnable",
+ "version": "0.1.0",
+ "description": "Core Runnable interface and base types for creating executable, streamable operations.",
+ "main": "index.ts",
+ "types": "./index.d.ts",
+ "type": "module",
+ "license": "MIT",
+ "exports": {
+  ".": "./index.ts",
+  "./*": "./*.ts"
+ },
+ "scripts": {
+  "test": "vitest run",
+  "test:watch": "vitest"
+ },
+ "dependencies": {
+  "eventemitter3": "^5.0.1",
+  "zod": "^4.0.17"
+ },
+ "devDependencies": {
+  "typescript": "^5.9.2",
+  "vitest": "^3.2.4"
+ }
 }

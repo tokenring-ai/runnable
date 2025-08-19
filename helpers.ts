@@ -1,12 +1,8 @@
 /**
- * @fileoverview Helper functions for creating standardized events in runnables
  */
 
 /**
  * Creates an info log event
- * @param message - The info message
- * @param metadata - Additional metadata to include
- * @returns Info event object
  */
 export function info(message: string, metadata: Record<string, any> = {}): Record<string, any> {
   return {
@@ -20,9 +16,6 @@ export function info(message: string, metadata: Record<string, any> = {}): Recor
 
 /**
  * Creates a warning log event
- * @param message - The warning message
- * @param metadata - Additional metadata to include
- * @returns Warning event object
  */
 export function warning(message: string, metadata: Record<string, any> = {}): Record<string, any> {
   return {
@@ -36,10 +29,6 @@ export function warning(message: string, metadata: Record<string, any> = {}): Re
 
 /**
  * Creates an error log event
- * @param message - The error message
- * @param error - Optional error object
- * @param metadata - Additional metadata to include
- * @returns Error event object
  */
 export function error(
   message: string,
@@ -70,10 +59,6 @@ export function error(
 
 /**
  * Creates a fatal error event
- * @param message - The fatal error message
- * @param error - Optional error object
- * @param metadata - Additional metadata to include
- * @returns Fatal error event object
  */
 export function fatal(
   message: string,
@@ -104,10 +89,6 @@ export function fatal(
 
 /**
  * Creates a performance log event
- * @param operation - The operation being measured
- * @param duration - Duration in milliseconds
- * @param metadata - Additional metadata to include
- * @returns Performance event object
  */
 export function performance(
   operation: string,
@@ -161,7 +142,6 @@ export class PerformanceTimer {
   isRunning: boolean;
 
   /**
-   * @param name - Name of the operation being timed
    */
   constructor(name: string) {
     this.name = name;
@@ -172,7 +152,6 @@ export class PerformanceTimer {
 
   /**
    * Starts the timer
-   * @returns Returns this for chaining
    */
   start(): PerformanceTimer {
     this.startTime = Date.now();
@@ -182,7 +161,6 @@ export class PerformanceTimer {
 
   /**
    * Captures a measurement (for loop timing)
-   * @returns The duration of this measurement
    */
   capture(): number {
     if (!this.isRunning) {
@@ -202,7 +180,6 @@ export class PerformanceTimer {
 
   /**
    * Stops the timer and captures final measurement
-   * @returns The duration of the final measurement
    */
   stop(): number {
     if (!this.isRunning) {
@@ -216,7 +193,6 @@ export class PerformanceTimer {
 
   /**
    * Gets performance statistics
-   * @returns Statistics object with min, max, average, total, and count
    */
   getStats(): PerformanceStats {
     if (this.measurements.length === 0) {
@@ -248,8 +224,6 @@ export class PerformanceTimer {
 
   /**
    * Creates a performance event with statistics
-   * @param metadata - Additional metadata to include
-   * @returns Performance event object with statistics
    */
   performanceStats(metadata: Record<string, any> = {}): Record<string, any> {
     const stats = this.getStats();
@@ -267,7 +241,6 @@ export class PerformanceTimer {
 
   /**
    * Resets the timer, clearing all measurements
-   * @returns Returns this for chaining
    */
   reset(): PerformanceTimer {
     this.measurements = [];
@@ -279,8 +252,6 @@ export class PerformanceTimer {
 
 /**
  * Creates a new performance timer
- * @param name - Name of the operation being timed
- * @returns New performance timer instance
  */
 export function createPerformanceTimer(name: string): PerformanceTimer {
   return new PerformanceTimer(name);
@@ -296,9 +267,6 @@ export interface MeasureResult<T> {
 
 /**
  * Measures the execution time of a function
- * @param name - Name of the operation
- * @param fn - Function to measure
- * @returns Result and performance event
  */
 export async function measureAsync<T>(
   name: string,
@@ -322,9 +290,6 @@ export async function measureAsync<T>(
 
 /**
  * Measures the execution time of a synchronous function
- * @param name - Name of the operation
- * @param fn - Function to measure
- * @returns Result and performance event
  */
 export function measure<T>(
   name: string,

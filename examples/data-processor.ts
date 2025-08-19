@@ -1,5 +1,4 @@
 /**
- * @fileoverview Example runnable demonstrating the use of helper functions
  */
 
 import {createPerformanceTimer, error, fatal, info, measure, measureAsync, warning,} from "../helpers.js";
@@ -136,9 +135,6 @@ export class DataProcessorRunnable extends Runnable {
 
   /**
    * Process a single batch of items
-   * @param {Array} batch - Items to process
-   * @param {number} batchNumber - Batch number for logging
-   * @returns {Promise<{processed: Array, skipped: number, errors: number, events: Array}>}
    */
   async processBatch(
     batch: any[],
@@ -229,8 +225,6 @@ export class DataProcessorRunnable extends Runnable {
 
   /**
    * Process a single item
-   * @param {any} item - Item to process
-   * @returns {Promise<any>} Processed item
    */
   async processItem(item: any): Promise<any> {
     // Simulate item processing with retries
@@ -263,8 +257,6 @@ export class DataProcessorRunnable extends Runnable {
 
   /**
    * Validate the final results
-   * @param {Array} results - Processed results
-   * @returns {Array} Validated results
    */
   async validateResults(results: any[]): Promise<any[]> {
     // Simulate validation logic

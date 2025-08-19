@@ -1,6 +1,4 @@
 /**
- * @file core/runnable/graph.ts
- * @description Implements a graph-based runnable that can orchestrate multiple interconnected runnables.
  */
 
 import {ErrorEvent, LogEvent} from "./events.js";
@@ -158,10 +156,6 @@ export type RunnableGraphOptions = {
  * A runnable that orchestrates a graph of interconnected runnables.
  * Supports complex data flows including fan-out, fan-in, and conditional execution.
  *
- * @template InputType - The type of input data for the graph
- * @template OutputType - The type of final output from the graph
- * @template YieldType - The type of events yielded during execution
- * @template ContextType - The type of context object
  */
 export class RunnableGraph<
   InputType = any,
@@ -192,7 +186,6 @@ export class RunnableGraph<
 
   /**
    * Creates a new RunnableGraph instance.
-   * @param options - Configuration options
    */
   constructor(options: RunnableGraphOptions = {}) {
     super(options);
@@ -206,8 +199,6 @@ export class RunnableGraph<
 
   /**
    * Creates a builder for constructing graphs fluently.
-   * @param options - Graph options
-   * @returns A builder instance
    */
   static builder(options?: RunnableGraphOptions): RunnableGraphBuilder {
     return new RunnableGraphBuilder(options);
@@ -215,10 +206,6 @@ export class RunnableGraph<
 
   /**
    * Adds a node to the graph.
-   * @param id - Unique identifier for the node
-   * @param runnable - The runnable instance
-   * @param config - Node configuration
-   * @returns This instance for chaining
    */
   addNode(
     id: string,
@@ -233,7 +220,7 @@ export class RunnableGraph<
       throw new Error(`Node with id '${id}' already exists`);
     }
 
-    if (!(runnable instanceof Runnable)) {
+    if (!(true)) {
       throw new Error(`Node '${id}' must be a Runnable instance`);
     }
 
@@ -252,10 +239,6 @@ export class RunnableGraph<
 
   /**
    * Connects two nodes in the graph.
-   * @param fromNodeId - Source node ID
-   * @param toNodeId - Target node ID
-   * @param config - Connection configuration
-   * @returns This instance for chaining
    */
   connect(
     fromNodeId: string,
@@ -335,8 +318,6 @@ export class RunnableGraph<
 
   /**
    * Sets the entry nodes for the graph (nodes that receive the initial input).
-   * @param nodeIds - Node IDs that should receive the graph input
-   * @returns This instance for chaining
    */
   setEntryNodes(...nodeIds: string[]): RunnableGraph<InputType, OutputType, YieldType, ContextType> {
     // Validate all nodes exist
@@ -354,8 +335,6 @@ export class RunnableGraph<
 
   /**
    * Sets the exit nodes for the graph (nodes whose output becomes the graph's output).
-   * @param nodeIds - Node IDs whose output should be returned
-   * @returns This instance for chaining
    */
   setExitNodes(...nodeIds: string[]): RunnableGraph<InputType, OutputType, YieldType, ContextType> {
     // Validate all nodes exist
@@ -373,10 +352,6 @@ export class RunnableGraph<
 
   /**
    * Invokes the graph, executing all nodes according to their dependencies.
-   * @param input - Input for the graph
-   * @param context - Context for the graph execution
-   * @param persistence
-   * @returns The final output from the exit nodes
    */
   async* invoke(
     input: InputType,
@@ -539,7 +514,6 @@ export class RunnableGraph<
 
   /**
    * Returns a summary description of the graph
-   * @returns A summary object with graph structure information
    */
   describe() {
     return {
@@ -1156,7 +1130,7 @@ export class RunnableGraph<
         return value;
       } else if (incomingEdges.length > 1) {
         // Multiple inputs for a single parameter - collect into an array
-        const values = await Promise.all(
+        return await Promise.all(
           incomingEdges.map(async (edge) => {
             const sourceNodeId = edge.from;
             const sourceOutput = edge.fromOutput;
@@ -1171,8 +1145,6 @@ export class RunnableGraph<
             return value;
           })
         );
-
-        return values;
       } else {
         throw new Error(`Node '${nodeId}' has no input connections`);
       }

@@ -7,7 +7,7 @@ import {RunnableGraph} from "./graph.js";
 import {Runnable} from "./runnable.js";
 
 // Create a runnable with optional output
-class NodeA extends Runnable {
+class NodeA extends Runnable<{ value: number }, { result?: string }, { type: "log"; message: string }> {
   name = "Node A";
 
   inputSchema = z.object({
@@ -18,14 +18,14 @@ class NodeA extends Runnable {
     result: z.string().optional(), // Optional output
   });
 
-  async* invoke(input: any) {
+  async* invoke(input: { value: number }) {
     yield {type: "log", message: "Node A processing..."};
     return {result: `Processed: ${input.value}`};
   }
 }
 
 // Create a runnable with required input
-class NodeB extends Runnable {
+class NodeB extends Runnable<{ result: string }, { final: string }, { type: "log"; message: string }> {
   name = "Node B";
 
   inputSchema = z.object({
@@ -36,7 +36,7 @@ class NodeB extends Runnable {
     final: z.string(),
   });
 
-  async* invoke(input: any) {
+  async* invoke(input: { result: string }) {
     yield {type: "log", message: "Node B processing..."};
     return {final: `Final: ${input.result}`};
   }

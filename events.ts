@@ -1,6 +1,4 @@
 /**
- * @file core/runnable/events.ts
- * @description Defines base event types that can be yielded by a Runnable's `invoke` generator.
  *              These are intended to be generic and reusable.
  *              Orchestrators or more complex Runnables can define their own more specific event types
  *              that might extend or incorporate these.
@@ -46,8 +44,6 @@ class BaseEvent {
   timestamp: number;
 
   /**
-   * @param type The event type
-   * @param metadata Additional metadata for the event
    */
   constructor(type: string, metadata: Partial<BaseRunnableEvent> = {}) {
     this.type = type;
@@ -66,15 +62,12 @@ export class LogEvent extends BaseEvent {
   message: string;
 
   /**
-   * @param level The severity level of the log
-   * @param message The log message
-   * @param metadata Additional metadata including optional details
    */
   constructor(
     level: "debug" | "info" | "warn" | "error",
     message: string,
     metadata: Partial<BaseRunnableEvent> & {
-      details?: any;
+      details?: unknown;
     } = {}
   ) {
     super("log", metadata);
@@ -88,13 +81,11 @@ export class LogEvent extends BaseEvent {
  */
 export class ChunkEvent extends BaseEvent {
   /** The piece of partial output data */
-  data: any;
+  data: unknown;
 
   /**
-   * @param data The piece of partial output data
-   * @param metadata Additional metadata for the event
    */
-  constructor(data: any, metadata: Partial<BaseRunnableEvent> = {}) {
+  constructor(data: unknown, metadata: Partial<BaseRunnableEvent> = {}) {
     super("chunk", metadata);
     this.data = data;
   }
@@ -109,12 +100,10 @@ export class ErrorEvent extends BaseEvent {
     name: string;
     message: string;
     stack?: string;
-    details?: any;
+    details?: unknown;
   };
 
   /**
-   * @param err The error object, string, or error details
-   * @param metadata Additional metadata for the event
    */
   constructor(
     err:
@@ -124,7 +113,7 @@ export class ErrorEvent extends BaseEvent {
       name: string;
       message: string;
       stack?: string;
-      details?: any;
+      details?: unknown;
     },
     metadata: Partial<BaseRunnableEvent> = {}
   ) {
@@ -142,13 +131,17 @@ export class ErrorEvent extends BaseEvent {
 }
 
 // Factory helpers kept for backward compatibility
-export function createLogEvent(level: "debug" | "info" | "warn" | "error", message: string, metadata: Partial<BaseRunnableEvent> & {
-  details?: any
-} = {}) {
+export function createLogEvent(
+  level: "debug" | "info" | "warn" | "error",
+  message: string,
+  metadata: Partial<BaseRunnableEvent> & {
+    details?: unknown;
+  } = {}
+) {
   return new LogEvent(level, message, metadata);
 }
 
-export function createChunkEvent(data: any, metadata: Partial<BaseRunnableEvent> = {}) {
+export function createChunkEvent(data: unknown, metadata: Partial<BaseRunnableEvent> = {}) {
   return new ChunkEvent(data, metadata);
 }
 
@@ -160,7 +153,7 @@ export function createErrorEvent(
     name: string;
     message: string;
     stack?: string;
-    details?: any;
+    details?: unknown;
   },
   metadata: Partial<BaseRunnableEvent> = {}
 ) {

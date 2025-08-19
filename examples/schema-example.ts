@@ -1,6 +1,4 @@
 /**
- * @file examples/schema-example.ts
- * @description Example demonstrating the new Zod schema functionality in Runnable
  */
 
 import {z} from "zod";
@@ -31,8 +29,8 @@ export class GreetingRunnable extends Runnable {
   }
 
   async* invoke(
-    input: any,
-    context: any,
+    input: z.infer<typeof inputSchema>,
+    context?: unknown,
   ): AsyncGenerator<
     {
       type: string;
@@ -41,8 +39,8 @@ export class GreetingRunnable extends Runnable {
       timestamp: number;
       runnableName: string;
     },
-    any,
-    unknown
+    z.infer<typeof outputSchema>,
+    void
   > {
     // Validate input using the schema
     try {

@@ -227,6 +227,7 @@ describe("Runnable (core/runnable/runnable.ts)", () => {
 					return i + 1;
 				}
 			}
+
 			const runnable = new AddOne();
 			const result = await runnable.run(41);
 			expect(result).toBe(42);
@@ -239,6 +240,7 @@ describe("Runnable (core/runnable/runnable.ts)", () => {
 					return 2;
 				}
 			}
+
 			const runnable = new Yielding();
 			const output = await runnable.run();
 			expect(output).toBe(2);

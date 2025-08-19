@@ -1,6 +1,4 @@
 /**
- * @file core/runnable/schema-validator.ts
- * @description Provides utilities for validating Zod schema compatibility between runnables
  */
 
 import {z} from 'zod';
@@ -63,8 +61,6 @@ export type SchemaInfo = {
 
 /**
  * Extracts schema information from a Zod schema
- * @param schema - The Zod schema to analyze
- * @returns Information about the schema structure
  */
 function extractSchemaInfo(schema: z.ZodSchema): SchemaInfo {
   if (!schema || !schema._def) {
@@ -171,9 +167,6 @@ function extractSchemaInfo(schema: z.ZodSchema): SchemaInfo {
 
 /**
  * Checks if two basic types are compatible
- * @param outputType - The output type
- * @param inputType - The input type
- * @returns Whether the types are compatible
  */
 function areBasicTypesCompatible(outputType: string, inputType: string): boolean {
   // Any and unknown are compatible with everything
@@ -230,9 +223,6 @@ function areBasicTypesCompatible(outputType: string, inputType: string): boolean
 
 /**
  * Validates compatibility between object schemas
- * @param outputSchema - The output schema info
- * @param inputSchema - The input schema info
- * @returns Validation result
  */
 function validateObjectCompatibility(
   outputSchema: SchemaInfo,
@@ -293,9 +283,6 @@ function validateObjectCompatibility(
 
 /**
  * Validates compatibility between array schemas
- * @param outputSchema - The output schema info
- * @param inputSchema - The input schema info
- * @returns Validation result
  */
 function validateArrayCompatibility(
   outputSchema: SchemaInfo,
@@ -333,8 +320,6 @@ function validateArrayCompatibility(
 
 /**
  * Validates compatibility between enum schemas
- * @param outputSchema - The output schema info
- * @param inputSchema - The input schema info
  * @returns Validation result
  */
 function validateEnumCompatibility(
